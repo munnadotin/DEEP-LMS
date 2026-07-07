@@ -6,7 +6,7 @@ const validate = <T extends ZodTypeAny>(schema: T) => (req: Request, res: Respon
     if (!result.success) {
         res.status(400).json({
             success: false,
-            message: result.error.issues.map((issue) => issue.message),
+            message: result.error.issues[0]!.message,
         })
         return;
     }
