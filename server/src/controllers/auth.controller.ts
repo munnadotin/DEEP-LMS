@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import User from '../model/user.model';
 import generateRegisterLinkToken from '../utils/tokenGenerator';
 import sendEmail from '../services/emailSender';
-import bcrypt from 'bcryptjs';
+import { redis } from '../config/redis';
 
 const registerUser = async (req: Request, res: Response) => {
     const { name, email, password, role } = req.body;
@@ -24,8 +24,17 @@ const registerUser = async (req: Request, res: Response) => {
         });
 
         // generate link for verification
-        const verificationLink = `http://localhost:3000/verify/${generateRegisterLinkToken(user._id.toString())}`;
-        
+        const token = generateRegisterLinkToken(user._id.toString());
+
+        await redis.set(
+            `verify:${token}`,
+            user._id.toString(),
+            "EX",
+            900 // 15 minutes
+        );
+
+        const verificationLink = `${process.env.CLIENT_URL}/auth/verify?token=${token}`;
+
         // send verification email to user
         await sendEmail(user.email, "Verify Your Email", verificationLink);
 
@@ -47,6 +56,51 @@ const registerUser = async (req: Request, res: Response) => {
     }
 }
 
+const verifyAccount = async (req: Request, res: Response) => {
+    try {
+        const { token } = req.query;
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: "Token is required",
+            })
+        }
+
+        // check if token exists in redis
+        const userId = await redis.get(`verify:${token}`);
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired token",
+            })
+        }
+        // check if user exists
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        // verify user account
+        user.isVerified = true;
+        await user.save();
+
+        // delete token from redis
+        await redis.del(`verify:${token}`);
+
+        return res.status(200).json({
+            success: true,
+            message: "User account verified successfully",
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        })
+    }
+}
+
 const loginUser = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     try {
@@ -59,7 +113,16 @@ const loginUser = async (req: Request, res: Response) => {
             })
         }
         // check password validity
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await user.comparePassword(password);
+
+        // check if user is verified
+        if (!user.isVerified) {
+            return res.status(400).json({
+                success: false,
+                message: "User account is not verified",
+            })
+        }
+
         if (!isPasswordValid) {
             return res.status(400).json({
                 success: false,
@@ -92,4 +155,5 @@ const loginUser = async (req: Request, res: Response) => {
 export const authController = {
     registerUser,
     loginUser,
+    verifyAccount,
 }

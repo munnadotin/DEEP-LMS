@@ -16,6 +16,13 @@ const authRouter = Router();
 authRouter.post("/register", validate(registerSchema), authController.registerUser);
 
 /**
+ * Verify a user account.
+ * --- required
+ * - token
+ */
+authRouter.get("/verify", authController.verifyAccount);
+
+/**
  * Login a user.
  * --- required
  * - email

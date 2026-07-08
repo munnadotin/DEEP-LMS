@@ -7,7 +7,7 @@ const verificationEmailTemplate = (verificationLink: string) => {
       </div>
 
       <div style="padding: 30px;">
-        <h3>Hello</h3>
+        <h3>Deep LMS,</h3>
 
         <p>
           Thanks for signing up. Click the button below to verify your email address.
@@ -29,14 +29,6 @@ const verificationEmailTemplate = (verificationLink: string) => {
             Verify Email
           </a>
         </div>
-
-        <p>
-          Or copy and paste this link into your browser:
-        </p>
-
-        <p style="word-break: break-all; color: #4F46E5;">
-          ${verificationLink}
-        </p>
 
         <p>
           If you didn't request this, you can safely ignore this email.

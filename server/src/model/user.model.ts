@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import type { User } from "../types/User.type";
 import bcrypt from "bcryptjs";
+import type { IUser, User } from "../types/User.type";
 
-const userSchema = new mongoose.Schema<User>({
+const userSchema = new mongoose.Schema<IUser>({
     name: {
         type: String,
         required: true,
@@ -30,13 +30,16 @@ const userSchema = new mongoose.Schema<User>({
     timestamps: true,
 })
 
-const User = mongoose.model<User>("User", userSchema);
-
+// hash password before saving
 userSchema.pre("save", async function () {
-    if (!this.isModified("password")) {
-        return;
-    }
-    return this.password = await bcrypt.hash(this.password, 10);
+    if (!this.isModified("password")) return;
+    this.password = await bcrypt.hash(this.password, 10);
 })
 
+// compare password with hashed password
+userSchema.methods.comparePassword = async function (candidatePassword: string) {
+    return await bcrypt.compare(candidatePassword, this.password);
+}
+
+const User = mongoose.model<IUser>("User", userSchema);
 export default User;
