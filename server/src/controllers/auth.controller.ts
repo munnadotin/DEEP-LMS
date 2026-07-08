@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import User from '../model/user.model';
-import generateRegisterLinkToken from '../utils/tokenGenerator';
+import { generateRegisterLinkToken, refreshTokenGenerator, accessTokenGenerator } from '../utils/tokenGenerator';
 import sendEmail from '../services/emailSender';
 import { redis } from '../config/redis';
 
@@ -112,8 +112,6 @@ const loginUser = async (req: Request, res: Response) => {
                 message: "Email not found",
             })
         }
-        // check password validity
-        const isPasswordValid = await user.comparePassword(password);
 
         // check if user is verified
         if (!user.isVerified) {
@@ -123,6 +121,9 @@ const loginUser = async (req: Request, res: Response) => {
             })
         }
 
+        // check password validity
+        const isPasswordValid = await user.comparePassword(password);
+
         if (!isPasswordValid) {
             return res.status(400).json({
                 success: false,
@@ -130,9 +131,17 @@ const loginUser = async (req: Request, res: Response) => {
             })
         }
 
-        // accessToken
-
         // refreshToken
+        const refreshToken = refreshTokenGenerator(user._id.toString());
+        // set refreshToken in cookie
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        })
+
+        // accessToken
+        const accessToken = accessTokenGenerator(user._id.toString());
 
         return res.status(200).json({
             success: true,
@@ -141,8 +150,8 @@ const loginUser = async (req: Request, res: Response) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                accessToken: ""
-            }
+            },
+            accessToken: accessToken
         })
     } catch (error) {
         res.status(500).json({
@@ -151,6 +160,37 @@ const loginUser = async (req: Request, res: Response) => {
         })
     }
 }
+
+const getAccessToken = async (req: Request, res: Response) => {
+    try {
+        const { refreshToken } = req.cookies;
+        if (!refreshToken) {
+            return res.status(400).json({
+                success: false,
+                message: "Refresh token is required",
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        })
+    }
+}
+
+// const getMe = async (req: Request, res: Response) => {
+//     const { userId } = req.user;
+//     const user = await User.findById(userId);
+//     return res.status(200).json({
+//         success: true,
+//         message: "User fetched successfully",
+//         data: {
+//             name: user.name,
+//             email: user.email,
+//             role: user.role,
+//         },
+//     })
+// }
 
 export const authController = {
     registerUser,
