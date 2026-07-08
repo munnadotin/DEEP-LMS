@@ -7,10 +7,10 @@ export const generateRegisterLinkToken = (id: string, ) => {
 
 // Generate refresh token for 7 days
 export const refreshTokenGenerator = (id: string) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+    return jwt.sign({ userId: id }, process.env.JWT_SECRET!, { expiresIn: "7d" });
 }
 
 // Generate access token for 15 minutes
 export const accessTokenGenerator = (id: string) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET!, { expiresIn: "15m" });
+    return jwt.sign({ userId: id }, process.env.JWT_SECRET!, { expiresIn: "15m" });
 }

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authController } from '../controllers/auth.controller';
 import validate from '../middlewares/validate';
 import registerSchema from '../validations/auth.validation';
+import { auth_middleware } from '../middlewares/auth.middleware';
 
 const authRouter = Router();
 
@@ -29,5 +30,13 @@ authRouter.get("/verify", authController.verifyAccount);
  * - password
  */
 authRouter.post("/login", authController.loginUser);
+
+/**
+ * Get Me
+ * --- required
+ * - token
+ */
+authRouter.get("/me", auth_middleware, authController.getMe);
+
 
 export default authRouter;

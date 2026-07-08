@@ -3,6 +3,7 @@ import User from '../model/user.model';
 import { generateRegisterLinkToken, refreshTokenGenerator, accessTokenGenerator } from '../utils/tokenGenerator';
 import sendEmail from '../services/emailSender';
 import { redis } from '../config/redis';
+import jwt from 'jsonwebtoken';
 
 const registerUser = async (req: Request, res: Response) => {
     const { name, email, password, role } = req.body;
@@ -170,6 +171,35 @@ const getAccessToken = async (req: Request, res: Response) => {
                 message: "Refresh token is required",
             })
         }
+
+        // verify refreshToken
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!);
+        if (!decoded) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired refresh token",
+            })
+        }
+        // check if user exists
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+        // generate accessToken
+        const accessToken = accessTokenGenerator(user._id.toString());
+        return res.status(200).json({
+            success: true,
+            message: "User logged in successfully",
+            data: {
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            },
+            accessToken: accessToken
+        })
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -178,22 +208,39 @@ const getAccessToken = async (req: Request, res: Response) => {
     }
 }
 
-// const getMe = async (req: Request, res: Response) => {
-//     const { userId } = req.user;
-//     const user = await User.findById(userId);
-//     return res.status(200).json({
-//         success: true,
-//         message: "User fetched successfully",
-//         data: {
-//             name: user.name,
-//             email: user.email,
-//             role: user.role,
-//         },
-//     })
-// }
+const getMe = async (req: Request, res: Response) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+
+        const { _id, name, email, role } = req.user;
+
+        return res.status(200).json({
+            success: true,
+            message: "User fetched successfully",
+            data: {
+                _id: _id.toString(),
+                name: name,
+                email: email,
+                role: role,
+            }
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        })
+    }
+}
 
 export const authController = {
     registerUser,
     loginUser,
     verifyAccount,
+    getMe,
+    getAccessToken,
 }
