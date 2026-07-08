@@ -139,7 +139,15 @@ const loginUser = async (req: Request, res: Response) => {
             httpOnly: true,
             secure: true,
             sameSite: "none",
+            maxAge: 60 * 60 * 24 * 7 // 7 days
         })
+        // set refreshToken in redis
+        await redis.set(
+            `refreshToken:${user._id.toString()}`,
+            refreshToken,
+            "EX",
+            60 * 60 * 24 * 7 // 7 days
+        );
 
         // accessToken
         const accessToken = accessTokenGenerator(user._id.toString());
@@ -162,9 +170,11 @@ const loginUser = async (req: Request, res: Response) => {
     }
 }
 
-const getAccessToken = async (req: Request, res: Response) => {
+const refreshAccessToken = async (req: Request, res: Response) => {
     try {
         const { refreshToken } = req.cookies;
+
+        // check if refreshToken exists
         if (!refreshToken) {
             return res.status(400).json({
                 success: false,
@@ -172,33 +182,46 @@ const getAccessToken = async (req: Request, res: Response) => {
             })
         }
 
-        // verify refreshToken
-        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!);
-        if (!decoded) {
-            return res.status(400).json({
+        // validate refreshToken
+        const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET!) as { userId: string };
+
+        // validate refreshToken
+        const storedRefreshToken = await redis.get(`refreshToken:${decoded.userId}`);
+
+        if (!storedRefreshToken || storedRefreshToken !== refreshToken) {
+            return res.status(401).json({
                 success: false,
                 message: "Invalid or expired refresh token",
             })
         }
-        // check if user exists
-        const user = await User.findById(decoded.userId);
-        if (!user) {
-            return res.status(400).json({
-                success: false,
-                message: "User not found",
-            })
-        }
-        // generate accessToken
-        const accessToken = accessTokenGenerator(user._id.toString());
+
+        // generate new accessToken
+        const accessToken = accessTokenGenerator(decoded.userId);
+
         return res.status(200).json({
             success: true,
-            message: "User logged in successfully",
-            data: {
-                name: user.name,
-                email: user.email,
-                role: user.role,
-            },
+            message: "Access token refreshed successfully",
             accessToken: accessToken
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: (error as Error).message,
+        })
+    }
+}
+
+const logoutUser = async (req: Request, res: Response) => {
+    try {
+        // delete refreshToken from cookie
+        res.clearCookie("refreshToken");
+
+        // delete refreshToken from redis
+        await redis.del(`refreshToken:${req.user._id}`);
+
+        return res.status(200).json({
+            success: true,
+            message: "User logged out successfully",
         })
     } catch (error) {
         res.status(500).json({
@@ -242,5 +265,6 @@ export const authController = {
     loginUser,
     verifyAccount,
     getMe,
-    getAccessToken,
+    refreshAccessToken,
+    logoutUser,
 }

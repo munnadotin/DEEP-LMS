@@ -38,5 +38,18 @@ authRouter.post("/login", authController.loginUser);
  */
 authRouter.get("/me", auth_middleware, authController.getMe);
 
+/**
+ * Refresh Access Token
+ * --- required
+ * - refreshToken
+ */
+authRouter.post("/refresh-access-token", authController.refreshAccessToken);
+
+/**
+ * Logout a user.
+ * --- required
+ * - token
+ */
+authRouter.post("/logout", auth_middleware, authController.logoutUser);
 
 export default authRouter;
