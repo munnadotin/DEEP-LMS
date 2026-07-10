@@ -25,7 +25,12 @@ const userSchema = new mongoose.Schema<IUser>({
     isVerified: {
         type: Boolean,
         default: false,
-    }
+    },
+    enrolledCourses: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Course",
+        default: [],
+    }],
 }, {
     timestamps: true,
 })

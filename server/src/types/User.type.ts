@@ -6,9 +6,9 @@ export interface User {
     email: string;
     password: string;
     role: "educator" | "student";
+    comparePassword: (candidatePassword: string) => Promise<boolean>;
     isVerified: boolean;
-    createdAt: Date;
-    updatedAt: Date;
+    enrolledCourses: string[];
 }
 
 export interface IUser extends Document{
@@ -18,4 +18,5 @@ export interface IUser extends Document{
     role: "educator" | "student";
     comparePassword: (candidatePassword: string) => Promise<boolean>;
     isVerified: boolean;
+    enrolledCourses: string[];
 }
