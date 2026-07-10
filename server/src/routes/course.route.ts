@@ -9,12 +9,18 @@ import upload from '../middlewares/upload';
 const courseRouter = Router();
 
 // create course
-courseRouter.post("/create", upload.single("thumbnail"), auth_middleware, roleMiddleware("educator"), courseController.createCourse);
+courseRouter.post("/create", upload.single("thumbnail"), auth_middleware, roleMiddleware("educator"), validate(courseSchema), courseController.createCourse);
 
 // get all courses
-// courseRouter.get("/all", getAllCourses);
+courseRouter.get("/all", courseController.getAllCourses);
 
-// get course by slug
-// courseRouter.get("/:slug", getCourseById);
+// get course by id
+courseRouter.get("/:id", courseController.getCourseById);
+
+// update course
+courseRouter.patch("/:courseId", upload.single("thumbnail"), auth_middleware, roleMiddleware("educator"), courseController.updateCourse);
+
+// delete course
+courseRouter.delete("/:courseId", auth_middleware, roleMiddleware("educator", "admin"), courseController.deleteCourse);
 
 export default courseRouter;

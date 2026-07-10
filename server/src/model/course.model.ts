@@ -47,8 +47,8 @@ const courseSchema = new mongoose.Schema({
         default: "beginner",
     },
     duration: {
-        type: String,
-        required: true,
+        type: Number,
+        default: 0,
     },
     language: {
         type: String,
