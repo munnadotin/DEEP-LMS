@@ -28,8 +28,9 @@ const courseSchema = new mongoose.Schema({
         required: true,
     },
     enrolledStudents: {
-        type: Number,
-        default: 0,
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "User",
+        default: [],
     },
     ratings: {
         type: Number,
