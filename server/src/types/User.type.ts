@@ -5,7 +5,7 @@ export interface User {
     name: string;
     email: string;
     password: string;
-    role: "educator" | "student";
+    role: "educator" | "student" | "admin";
     comparePassword: (candidatePassword: string) => Promise<boolean>;
     isVerified: boolean;
     enrolledCourses: string[];
@@ -15,7 +15,7 @@ export interface IUser extends Document{
     name: string;
     email: string;
     password: string;
-    role: "educator" | "student";
+    role: "educator" | "student" | "admin";
     comparePassword: (candidatePassword: string) => Promise<boolean>;
     isVerified: boolean;
     enrolledCourses: string[];

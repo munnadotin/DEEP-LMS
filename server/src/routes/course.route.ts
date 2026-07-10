@@ -14,7 +14,7 @@ courseRouter.post("/create", upload.single("thumbnail"), auth_middleware, roleMi
 // get all courses
 // courseRouter.get("/all", getAllCourses);
 
-// get course by id
-// courseRouter.get("/:id", getCourseById);
+// get course by slug
+// courseRouter.get("/:slug", getCourseById);
 
 export default courseRouter;

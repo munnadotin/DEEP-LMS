@@ -5,6 +5,11 @@ const categorySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    slug: {
+        type: String,
+        required: true,
+        unique: true,
+    }
 })
 
 export const Category = mongoose.model("Category", categorySchema)
