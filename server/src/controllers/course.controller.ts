@@ -120,7 +120,7 @@ const updateCourse = async (req: Request, res: Response) => {
             const imageUrl = await uploadFile(file!.buffer, file?.originalname!);
             course.thumbnail = imageUrl!;
         }
-        
+
         // update course information if provided otherwise keep the old one
         course.title = title || course.title;
         course.description = description || course.description;

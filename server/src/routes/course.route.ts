@@ -5,6 +5,8 @@ import { roleMiddleware } from '../middlewares/role.middleware';
 import validate from '../middlewares/validate';
 import courseSchema from '../validations/course.validation';
 import upload from '../middlewares/upload';
+import lessonRouter from './lesson.route';
+import chapterRouter from './chapter.route';
 
 const courseRouter = Router();
 
@@ -22,5 +24,11 @@ courseRouter.patch("/:courseId", upload.single("thumbnail"), auth_middleware, ro
 
 // delete course
 courseRouter.delete("/:courseId", auth_middleware, roleMiddleware("educator", "admin"), courseController.deleteCourse);
+
+/**
+ * @desciption Chapter Routes
+ * @route /chapter
+ */
+courseRouter.use("/:courseId/chapter", chapterRouter);
 
 export default courseRouter;
