@@ -9,6 +9,14 @@ const chapterRouter = Router({ mergeParams: true });
 // create chapter
 chapterRouter.post("/create", auth_middleware, roleMiddleware("educator"), chapterController.createChapter);
 
+// get all chapters
+chapterRouter.get("/", chapterController.getAllChapters);
+
+// update chapter
+chapterRouter.patch("/:chapterId", auth_middleware, roleMiddleware("educator"), chapterController.updateChapter);
+
+// delete chapter
+chapterRouter.delete("/:chapterId", auth_middleware, roleMiddleware("educator"), chapterController.deleteChapter);
 
 /**
  * @desciption Lesson Routes
