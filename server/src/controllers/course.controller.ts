@@ -58,10 +58,12 @@ const createCourse = async (req: Request, res: Response) => {
 // get all courses
 const getAllCourses = async (_req: Request, res: Response) => {
     try {
-        const courses = await Course.find().populate("educator", "name");
+        // return all courses with published status
+        const courses = await Course.find({ published: "published" }).populate("educator", "name");
+
         return res.status(200).json({
             success: true,
-            message: "Courses Retrieved",
+            message: "Courses Retrieved with Published Status",
             courses,
         });
     } catch (error) {
@@ -76,11 +78,12 @@ const getAllCourses = async (_req: Request, res: Response) => {
 // get course by id
 const getCourseById = async (req: Request, res: Response) => {
     try {
-        const course = await Course.findById(req.params.id).populate("educator", "name");
+        // add filter for published status
+        const course = await Course.findOne({ _id: req.params.id, published: "published" }).populate("educator", "name");
         if (!course) {
             return res.status(404).json({
                 success: false,
-                message: "Course Not Found",
+                message: "Course Not Found or Not Published",
             });
         }
         return res.status(200).json({
@@ -101,7 +104,7 @@ const getCourseById = async (req: Request, res: Response) => {
 const updateCourse = async (req: Request, res: Response) => {
     try {
         const { courseId } = req.params;
-        const { title, description, category, price, level, language } = req.body;
+        const { title, description, category, price, level, language, published } = req.body;
         const { file } = req;
 
         if (!courseId) {
@@ -110,6 +113,7 @@ const updateCourse = async (req: Request, res: Response) => {
                 message: "Course ID is required",
             });
         }
+        // check if the course exists
         const course = await Course.findById(courseId);
         if (!course) {
             return res.status(404).json({
@@ -134,6 +138,7 @@ const updateCourse = async (req: Request, res: Response) => {
         course.price = price || course.price;
         course.level = level || course.level;
         course.language = language || course.language;
+        course.published = published || course.published;
 
         await course.save();
         return res.status(200).json({

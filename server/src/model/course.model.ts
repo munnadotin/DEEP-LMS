@@ -43,8 +43,9 @@ const courseSchema = new mongoose.Schema({
         default: 0,
     },
     published: {
-        type: Boolean,
-        default: false,
+        type: String,
+        enum: ["draft", "published"],
+        default: "draft",
     },
     level: {
         type: String,

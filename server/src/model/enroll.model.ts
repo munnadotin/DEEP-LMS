@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-
 const enrollSchema = new mongoose.Schema({
     course: {
         type: mongoose.Schema.Types.ObjectId,
@@ -21,7 +20,17 @@ const enrollSchema = new mongoose.Schema({
     progress: {
         type: Number,
         default: 0,
-    }
+    },
+    completedLessons: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Lesson",
+        default: [],
+    }],
+    lastLessonCompleted: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Lesson",
+        default: null,
+    },
 }, {
     timestamps: true,
 })
