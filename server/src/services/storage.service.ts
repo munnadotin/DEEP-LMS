@@ -9,6 +9,15 @@ const uploadFile = async (file: Buffer, fileName: string) => {
         file: file.toString("base64"),
         fileName,
     });
-    return result.url;
+
+    return result;
 }
-export default uploadFile;
+
+const deleteFile = async (fileId: string) => {
+    return await client.files.delete(fileId);
+}
+
+export default {
+    uploadFile,
+    deleteFile,
+};

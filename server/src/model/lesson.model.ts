@@ -11,20 +11,26 @@ const lessonSchema = new mongoose.Schema({
         required: true,
     },
     video: {
-        type: String,
-        required: true,
+        url: {
+            type: String,
+            required: true,
+        },
+        fileId: {
+            type: String,
+            required: true,
+        }
     },
     isFree: {
         type: Boolean,
         default: false,
     },
     resources: {
-        type: [String],
-        required: true,
+        type: [String], 
+        default: [],
     },
     duration: {
-        type: String,
-        required: true,
+        type: Number,
+        default: 0,
     },
 }, {
     timestamps: true,

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import uploadFile from "../services/storage.service";
 import { Course } from "../model/course.model";
+import storageService from "../services/storage.service";
 
 // create course
 const createCourse = async (req: Request, res: Response) => {
@@ -25,12 +25,15 @@ const createCourse = async (req: Request, res: Response) => {
         }
 
         // upload thumbnail image
-        const imageUrl = await uploadFile(file!.buffer, file?.originalname!);
+        const imageUrl = await storageService.uploadFile(file!.buffer, file?.originalname!);
 
         const course = await Course.create({
             title,
             description,
-            thumbnail: imageUrl!,
+            thumbnail: {
+                url: imageUrl.url!,
+                fileId: imageUrl.fileId!,
+            },
             category,
             price,
             level,
@@ -117,8 +120,11 @@ const updateCourse = async (req: Request, res: Response) => {
 
         // update thumbnail image
         if (file) {
-            const imageUrl = await uploadFile(file!.buffer, file?.originalname!);
-            course.thumbnail = imageUrl!;
+            const imageUrl = await storageService.uploadFile(file!.buffer, file?.originalname!);
+            course.thumbnail = {
+                url: imageUrl.url!,
+                fileId: imageUrl.fileId!,
+            };
         }
 
         // update course information if provided otherwise keep the old one
@@ -155,6 +161,11 @@ const deleteCourse = async (req: Request, res: Response) => {
                 message: "Course Not Found",
             });
         }
+        // delete thumbnail image from storage
+        if (course.thumbnail?.fileId) {
+            await storageService.deleteFile(course.thumbnail.fileId);
+        }
+        // delete course from database
         await course.deleteOne({ _id: courseId });
         return res.status(200).json({
             success: true,

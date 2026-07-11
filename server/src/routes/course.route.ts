@@ -5,7 +5,6 @@ import { roleMiddleware } from '../middlewares/role.middleware';
 import validate from '../middlewares/validate';
 import courseSchema from '../validations/course.validation';
 import upload from '../middlewares/upload';
-import lessonRouter from './lesson.route';
 import chapterRouter from './chapter.route';
 
 const courseRouter = Router();
