@@ -6,9 +6,12 @@ import enrollController from "../controllers/enroll.controllert";
 const enrollRouter = Router();
 
 // Enroll a course
-enrollRouter.post("/enroll/:courseId", auth_middleware, roleMiddleware("student"), enrollController.enrollCourse);
+enrollRouter.post("/:courseId", auth_middleware, roleMiddleware("student"), enrollController.enrollCourse);
 
 // Get user enrollments
 enrollRouter.get("/", auth_middleware, roleMiddleware("student"), enrollController.getEnrollments);
+
+// update enroll progress
+enrollRouter.patch("/:courseId/:lessonId/progress", auth_middleware, roleMiddleware("student"), enrollController.updateEnrollProgress);
 
 export default enrollRouter;
