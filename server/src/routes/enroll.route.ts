@@ -14,4 +14,7 @@ enrollRouter.get("/", auth_middleware, roleMiddleware("student"), enrollControll
 // update enroll progress
 enrollRouter.patch("/:courseId/:lessonId/progress", auth_middleware, roleMiddleware("student"), enrollController.updateEnrollProgress);
 
+// continue watch course
+enrollRouter.get("/:courseId/continue", auth_middleware, roleMiddleware("student"), enrollController.continueWatchCourse);
+
 export default enrollRouter;

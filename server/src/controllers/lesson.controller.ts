@@ -9,7 +9,7 @@ const createLesson = async (req: Request, res: Response) => {
         const { chapterId } = req.params;
         const { title, isFree, resources } = req.body;
         const { file } = req;
-        console.log(isFree)
+
         if (!chapterId) {
             return res.status(400).json({
                 success: false,
@@ -237,10 +237,10 @@ const deleteLesson = async (req: Request, res: Response) => {
             })
         };
 
-        // // delete video file from storage
-        // if (lesson.video?.fileId) {
-        //     await storageService.deleteFile(lesson.video.fileId);
-        // }
+        // delete video file from storage
+        if (lesson.video?.fileId) {
+            await storageService.deleteFile(lesson.video.fileId);
+        }
 
         // delete lesson
         await lesson.deleteOne();
