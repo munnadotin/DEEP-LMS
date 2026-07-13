@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Course } from "../model/course.model";
 import storageService from "../services/storage.service";
+import { Category } from "../model/category.model";
 
 // create course
 const createCourse = async (req: Request, res: Response) => {
@@ -185,11 +186,83 @@ const deleteCourse = async (req: Request, res: Response) => {
     }
 }
 
+/**
+ * @description Course Filter  
+ */
+const filterCourses = async (req: Request, res: Response) => {
+    try {
+        const { search, category, level, sort, page = 1, limit = 6 } = req.query;
+        const query = {} as any;
+
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+            ]
+        }
+        if (level) {
+            query.level = level as string;
+        }
+        if (category) {
+            const categories = await Category.findOne({ slug: category as string });
+            query.category = categories?._id;
+        }
+
+        // sort
+        let sortObj = {} as any;
+        switch (sort as string) {
+            case "newest":
+                sortObj = { createdAt: -1 };
+                break;
+            case "oldest":
+                sortObj = { createdAt: 1 };
+                break;
+            case "price-low":
+                sortObj = { price: -1 };
+                break;
+            case "level-high":
+                sortObj = { level: 1 };
+                break;
+            default:
+                sortObj = { createdAt: -1 };
+                break;
+        }
+
+        const courses = await Course.find(query)
+        .sort(sortObj)
+        .skip((page as number - 1) * (limit as number))
+        .limit((limit as number))
+        .populate("educator", "name");
+
+        const total = await Course.countDocuments(query);
+        const totalPages = Math.ceil(total / (limit as number));
+        const currentPage = page as number;
+
+        return res.status(200).json({
+            success: true,
+            message: "Courses Retrieved",
+            courses,
+            total,
+            totalPages,
+            currentPage,
+            limit : limit as number,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: (error as Error).message
+        });
+    }
+}
+
 const courseController = {
     createCourse,
     getAllCourses,
     getCourseById,
     updateCourse,
     deleteCourse,
+    filterCourses,
 }
 export default courseController;

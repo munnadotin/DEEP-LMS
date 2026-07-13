@@ -1,9 +1,9 @@
+import mongoose from "mongoose";
 import { Request, Response } from "express";
 import { Course } from "../model/course.model";
 import { Enroll } from "../model/enroll.model";
 import { Lesson } from "../model/lesson.model";
 import { Chapter } from "../model/chapter.model";
-import mongoose from "mongoose";
 
 // Enroll a course
 const enrollCourse = async (req: Request, res: Response) => {

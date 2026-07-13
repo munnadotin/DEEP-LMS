@@ -25,6 +25,13 @@ courseRouter.patch("/:courseId", upload.single("thumbnail"), auth_middleware, ro
 courseRouter.delete("/:courseId", auth_middleware, roleMiddleware("educator", "admin"), courseController.deleteCourse);
 
 /**
+ * @description Course Filter  
+ * @access public
+ * @method GET
+ */
+courseRouter.get("/", courseController.filterCourses);
+
+/**
  * @desciption Chapter Routes
  * @route /chapter
  */

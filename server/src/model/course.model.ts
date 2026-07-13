@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { slugifyString } from "../utils/slug";
 
 const courseSchema = new mongoose.Schema({
     title: {
@@ -18,6 +19,11 @@ const courseSchema = new mongoose.Schema({
             type: String,
             required: true,
         }
+    },
+    slug: {
+        type: String,
+        required: true,
+        unique: true,
     },
     category: {
         type: mongoose.Schema.Types.ObjectId,
@@ -63,6 +69,13 @@ const courseSchema = new mongoose.Schema({
     }
 }, {
     timestamps: true,
+})
+
+courseSchema.pre("save", function () {
+    if (this.isModified("title")) {
+        this.slug = slugifyString(this.title);
+    }
+    return this;
 })
 
 export const Course = mongoose.model("Course", courseSchema)
