@@ -19,7 +19,7 @@ export async function auth_middleware(req: Request, res: Response, next: NextFun
         // verify accessToken
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as MyJwtPayload;
         if (!decoded.userId) {
-            return res.status(400).json({
+            return res.status(401).json({
                 success: false,
                 message: "Invalid or expired access token",
             })
@@ -27,7 +27,7 @@ export async function auth_middleware(req: Request, res: Response, next: NextFun
         // check if user exists
         const user = await User.findById(decoded.userId);
         if (!user) {
-            return res.status(400).json({
+            return res.status(401).json({
                 success: false,
                 message: "User not found",
             })
@@ -36,7 +36,7 @@ export async function auth_middleware(req: Request, res: Response, next: NextFun
         req.user = user;
         next();
     } catch (error) {
-        return res.status(400).json({
+        return res.status(401).json({
             success: false,
             message: "Invalid or expired access token",
         })
