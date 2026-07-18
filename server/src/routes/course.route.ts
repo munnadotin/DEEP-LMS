@@ -15,8 +15,8 @@ courseRouter.post("/create", upload.single("thumbnail"), auth_middleware, roleMi
 // get all courses
 courseRouter.get("/all", courseController.getAllCourses);
 
-// get course by id
-courseRouter.get("/:id", courseController.getCourseById);
+// get course by slug
+courseRouter.get("/:slug", courseController.getCourseBySlug);
 
 // update course
 courseRouter.patch("/:courseId", upload.single("thumbnail"), auth_middleware, roleMiddleware("educator"), courseController.updateCourse);

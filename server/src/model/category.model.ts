@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { slugifyString } from "../utils/slug";
+import slugify from "slugify";
 
 const categorySchema = new mongoose.Schema({
     name: {
@@ -15,7 +15,13 @@ const categorySchema = new mongoose.Schema({
 
 categorySchema.pre("save", function () {
     if (this.isModified("name")) {
-        this.slug = slugifyString(this.name);
+        this.slug = slugify(this.name,
+            {
+                lower: true,
+                remove: /[*+~.()'"!-]/g,
+                strict: true,
+            }
+        )
     }
     return this;
 })

@@ -76,11 +76,64 @@ const getAllCourses = async (_req: Request, res: Response) => {
     }
 }
 
-// get course by id
-const getCourseById = async (req: Request, res: Response) => {
+// get course by slug
+const getCourseBySlug = async (req: Request, res: Response) => {
     try {
-        // add filter for published status
-        const course = await Course.findOne({ _id: req.params.id, published: "published" }).populate("educator", "name");
+        const slug = req.params.slug;
+
+        if (!slug) {
+            return res.status(400).json({
+                success: false,
+                message: "Course slug is required",
+            });
+        }
+
+        const course = await Course.aggregate([
+            {
+                $match: {
+                    slug: slug
+                }
+            },
+            {
+                $lookup: {
+                    from: "chapters",
+                    localField: "_id",
+                    foreignField: "course",
+                    as: "chapters"
+                }
+            },
+            {
+                $unwind: "$chapters"
+            },
+            {
+                $lookup: {
+                    from: "lessons",
+                    localField: "chapters._id",
+                    foreignField: "chapter",
+                    as: "lessons"
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    title: { $first: "$title" },
+                    price: { $first: "$price" },
+                    description: { $first: "$description" },
+                    thumbnail: { $first: "$thumbnail" },
+                    category: { $first: "$category" },
+                    ratings: { $first: "$ratings" },
+                    level: { $first: "$level" },
+                    chapters: {
+                        $push: {
+                            _id: "$chapters._id",
+                            title: "$chapters.title",
+                            lessons: "$lessons"
+                        }
+                    }
+                }
+            }
+        ])
+
         if (!course) {
             return res.status(404).json({
                 success: false,
@@ -228,11 +281,11 @@ const filterCourses = async (req: Request, res: Response) => {
                 break;
         }
 
-        const courses = await Course.find(query)
-        .sort(sortObj)
-        .skip((page as number - 1) * (limit as number))
-        .limit((limit as number))
-        .populate("educator", "name");
+        const courses = await Course.find({ ...query, published: "published" })
+            .sort(sortObj)
+            .skip((page as number - 1) * (limit as number))
+            .limit((limit as number))
+            .populate("educator", "name");
 
         const total = await Course.countDocuments(query);
         const totalPages = Math.ceil(total / (limit as number));
@@ -245,7 +298,7 @@ const filterCourses = async (req: Request, res: Response) => {
             total,
             totalPages,
             currentPage,
-            limit : limit as number,
+            limit: limit as number,
         });
 
     } catch (error) {
@@ -260,7 +313,7 @@ const filterCourses = async (req: Request, res: Response) => {
 const courseController = {
     createCourse,
     getAllCourses,
-    getCourseById,
+    getCourseBySlug,
     updateCourse,
     deleteCourse,
     filterCourses,
