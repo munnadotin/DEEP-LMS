@@ -123,10 +123,17 @@ const getCourseBySlug = async (req: Request, res: Response) => {
                     category: { $first: "$category" },
                     ratings: { $first: "$ratings" },
                     level: { $first: "$level" },
+                    educator: {
+                        $first: {
+                            _id: "$educator._id",
+                            name: "$educator.name"
+                        }
+                    },
                     chapters: {
                         $push: {
                             _id: "$chapters._id",
                             title: "$chapters.title",
+                            position: "$chapters.position",
                             lessons: "$lessons"
                         }
                     }
@@ -143,7 +150,7 @@ const getCourseBySlug = async (req: Request, res: Response) => {
         return res.status(200).json({
             success: true,
             message: "Course Retrieved",
-            course,
+            course: course[0],
         });
     } catch (error) {
         return res.status(500).json({
