@@ -6,6 +6,7 @@ import validate from '../middlewares/validate';
 import courseSchema from '../validations/course.validation';
 import upload from '../middlewares/upload';
 import chapterRouter from './chapter.route';
+import { optionalMiddleware } from '../middlewares/optional.middleware';
 
 const courseRouter = Router();
 
@@ -16,7 +17,7 @@ courseRouter.post("/create", upload.single("thumbnail"), auth_middleware, roleMi
 courseRouter.get("/all", courseController.getAllCourses);
 
 // get course by slug
-courseRouter.get("/:slug", courseController.getCourseBySlug);
+courseRouter.get("/:slug", optionalMiddleware, courseController.getCourseBySlug);
 
 // update course
 courseRouter.patch("/:courseId", upload.single("thumbnail"), auth_middleware, roleMiddleware("educator"), courseController.updateCourse);

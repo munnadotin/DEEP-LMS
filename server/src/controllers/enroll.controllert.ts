@@ -36,6 +36,14 @@ const enrollCourse = async (req: Request, res: Response) => {
             user: req.user._id,
             paymentStatus,
         });
+
+        // update enrolledStudents in Course
+        await Course.findByIdAndUpdate(courseId, {
+            $addToSet: {
+                enrolledStudents: req.user._id,
+            }
+        })
+        
         return res.status(201).json({
             success: true,
             message: "Course enrolled successfully",
@@ -55,7 +63,7 @@ const getEnrollments = async (req: Request, res: Response) => {
     try {
         const enrollments = await Enroll.find({ user: req.user._id }).populate({
             path: "course",
-            select: "title price thumbnail description",
+            select: "title slug price thumbnail description",
         }).populate({ path: "lastLessonCompleted", select: "title" });
 
         return res.status(200).json({

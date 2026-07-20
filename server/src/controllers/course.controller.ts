@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Course } from "../model/course.model";
 import storageService from "../services/storage.service";
 import { Category } from "../model/category.model";
+import { Enroll } from "../model/enroll.model";
 
 // create course
 const createCourse = async (req: Request, res: Response) => {
@@ -96,6 +97,14 @@ const getCourseBySlug = async (req: Request, res: Response) => {
             },
             {
                 $lookup: {
+                    from: "users",
+                    localField: "educator",
+                    foreignField: "_id",
+                    as: "educator"
+                }
+            },
+            {
+                $lookup: {
                     from: "chapters",
                     localField: "_id",
                     foreignField: "course",
@@ -125,9 +134,12 @@ const getCourseBySlug = async (req: Request, res: Response) => {
                     level: { $first: "$level" },
                     educator: {
                         $first: {
-                            _id: "$educator._id",
-                            name: "$educator.name"
+                            _id: { $arrayElemAt: ["$educator._id", 0] },
+                            name: { $arrayElemAt: ["$educator.name", 0] }
                         }
+                    },
+                    enrolledStudents: {
+                        $first: "$enrolledStudents"
                     },
                     chapters: {
                         $push: {
@@ -147,10 +159,22 @@ const getCourseBySlug = async (req: Request, res: Response) => {
                 message: "Course Not Found or Not Published",
             });
         }
+
+        let isEnrolled = false;
+
+        if (req.user) {
+            isEnrolled = !!(await Enroll.exists({
+                course: course[0]._id,
+                user: req.user._id
+            }))
+        }
+
+        const findedCourse = { ...course[0], isEnrolled }
+
         return res.status(200).json({
             success: true,
             message: "Course Retrieved",
-            course: course[0],
+            course: findedCourse,
         });
     } catch (error) {
         return res.status(500).json({
@@ -247,7 +271,7 @@ const deleteCourse = async (req: Request, res: Response) => {
 }
 
 /**
- * @description Course Filter  
+ * @description Course Filter
  */
 const filterCourses = async (req: Request, res: Response) => {
     try {
