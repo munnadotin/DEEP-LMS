@@ -3,6 +3,7 @@ import { Course } from "../model/course.model";
 import storageService from "../services/storage.service";
 import { Category } from "../model/category.model";
 import { Enroll } from "../model/enroll.model";
+import { Chapter, Lesson } from "../types/Course.type";
 
 // create course
 const createCourse = async (req: Request, res: Response) => {
@@ -169,7 +170,15 @@ const getCourseBySlug = async (req: Request, res: Response) => {
             }))
         }
 
-        const findedCourse = { ...course[0], isEnrolled }
+        const updatedChpaters = course[0].chapters.map((chapter: Chapter) => ({
+            ...chapter,
+            lessons: chapter.lessons.map((lesson: Lesson) => ({
+                ...lesson,
+                isFree: isEnrolled ? true : lesson.isFree
+            }))
+        }));
+
+        const findedCourse = { ...course[0], isEnrolled, chapters: updatedChpaters }
 
         return res.status(200).json({
             success: true,
