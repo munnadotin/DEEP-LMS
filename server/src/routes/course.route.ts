@@ -16,6 +16,9 @@ courseRouter.post("/create", upload.single("thumbnail"), auth_middleware, roleMi
 // get all courses
 courseRouter.get("/all", courseController.getAllCourses);
 
+// get all draft courses
+courseRouter.get("/draft", auth_middleware, roleMiddleware("educator", "admin"), courseController.getAllDraftCourse);
+
 // get course by slug
 courseRouter.get("/:slug", optionalMiddleware, courseController.getCourseBySlug);
 

@@ -78,6 +78,26 @@ const getAllCourses = async (_req: Request, res: Response) => {
     }
 }
 
+// get all draft courses
+const getAllDraftCourse = async (req: Request, res: Response) => {
+    try {
+        // return all courses with draft status
+        const courses = await Course.find({ published: "draft", educator: req.user._id }).populate("educator", "name");
+
+        return res.status(200).json({
+            success: true,
+            message: "Courses Retrieved with Published Status",
+            courses,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: (error as Error).message
+        });
+    }
+}
+
 // get course by slug
 const getCourseBySlug = async (req: Request, res: Response) => {
     try {
@@ -353,6 +373,7 @@ const filterCourses = async (req: Request, res: Response) => {
 const courseController = {
     createCourse,
     getAllCourses,
+    getAllDraftCourse,
     getCourseBySlug,
     updateCourse,
     deleteCourse,

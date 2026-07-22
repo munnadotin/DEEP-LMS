@@ -12,5 +12,5 @@ export const refreshTokenGenerator = (id: string) => {
 
 // Generate access token for 15 minutes
 export const accessTokenGenerator = (id: string) => {
-    return jwt.sign({ userId: id }, process.env.JWT_SECRET!, { expiresIn: "30s" });
+    return jwt.sign({ userId: id }, process.env.JWT_SECRET!, { expiresIn: "15m" });
 }
