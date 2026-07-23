@@ -2,13 +2,30 @@ import { Request, Response } from 'express';
 import { Chapter } from '../model/chapter.model';
 import { Lesson } from '../model/lesson.model';
 import storageService from '../services/storage.service';
+import { Course } from '../model/course.model';
 
 // create lesson
 const createLesson = async (req: Request, res: Response) => {
     try {
-        const { chapterId } = req.params;
+        const { courseId, chapterId } = req.params;
         const { title, isFree, resources } = req.body;
         const { file } = req;
+
+        if (!courseId) {
+            return res.status(400).json({
+                success: false,
+                message: "Course ID is required",
+            })
+        }
+
+        const course = await Course.findById(courseId);
+
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: "Course not found",
+            })
+        }
 
         if (!chapterId) {
             return res.status(400).json({
@@ -16,8 +33,10 @@ const createLesson = async (req: Request, res: Response) => {
                 message: "Chapter ID is required",
             })
         }
+
         // check if chapter exists
         const chapter = await Chapter.findById(chapterId);
+
         if (!chapter) {
             return res.status(404).json({
                 success: false,
