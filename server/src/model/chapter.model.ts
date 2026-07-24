@@ -14,6 +14,10 @@ const chapterSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    totalDuration: {
+        type: Number,
+        default: 0
+    }
 }, {
     timestamps: true,
 })

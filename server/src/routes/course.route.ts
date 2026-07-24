@@ -19,6 +19,9 @@ courseRouter.get("/all", courseController.getAllCourses);
 // get all draft courses
 courseRouter.get("/draft", auth_middleware, roleMiddleware("educator", "admin"), courseController.getAllDraftCourse);
 
+// get all courses by educator
+courseRouter.get("/", auth_middleware, roleMiddleware("educator", "admin"), courseController.getAllCoursesByEducator);
+
 // get course by slug
 courseRouter.get("/:slug", optionalMiddleware, courseController.getCourseBySlug);
 

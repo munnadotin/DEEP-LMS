@@ -71,6 +71,16 @@ const createLesson = async (req: Request, res: Response) => {
             duration: videoUrl.duration!,
             chapter: chapter._id,
         });
+
+        const lessons = await Lesson.find({ chapter: chapterId });
+
+        const totalDuration = lessons.reduce((sum, lesson) => {
+            return sum + lesson.duration
+        }, 0);
+
+        chapter.totalDuration = totalDuration;
+        await chapter.save();
+        
         return res.status(201).json({
             success: true,
             message: "Lesson created successfully",

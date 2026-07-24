@@ -38,6 +38,14 @@ const createChapter = async (req: Request, res: Response) => {
             position,
         });
 
+        const chapters = await Chapter.find({ course: courseId });
+        const totalChapterDuration = chapters.reduce((sum, chapter) => {
+            return sum += chapter.totalDuration
+        }, 0)
+
+        course.duration = totalChapterDuration;
+        await course.save();
+
         return res.status(200).json({
             success: true,
             message: "Chapter Created",
@@ -151,6 +159,7 @@ const deleteChapter = async (req: Request, res: Response) => {
 
         // delete chapter
         await Chapter.findByIdAndDelete(chapterId);
+
         return res.status(200).json({
             success: true,
             message: "Chapter Deleted",

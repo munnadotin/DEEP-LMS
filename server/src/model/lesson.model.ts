@@ -25,7 +25,7 @@ const lessonSchema = new mongoose.Schema({
         default: false,
     },
     resources: {
-        type: [String], 
+        type: [String],
         default: [],
     },
     duration: {
