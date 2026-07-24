@@ -319,6 +319,55 @@ const deleteCourse = async (req: Request, res: Response) => {
     }
 }
 
+// dashboard
+const educatorDashboard = async (req: Request, res: Response) => {
+    try {
+        const courses = await Course.find({ educator: req.user._id }).sort({ createdAt: -1 });
+        const totalStudents = courses.reduce((sum, coures) => (sum + coures.enrolledStudents.length), 0);
+        const publishedCourse = courses.filter((coures) => (coures.published === "published")).length;
+        const draftCoures = courses.filter((coures) => (coures.published === "draft")).length;
+        const totalDuration = courses.reduce((sum, course) => (sum + course.duration), 0) || 0;
+        const recentCourses = courses.slice(0, 3);
+
+        const revenue = await Enroll.aggregate([
+            {
+                $match: {
+                    educator: req.user._id,
+                    paymentStatus: "paid",
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    revenue: {
+                        $sum: "$amount",
+                    },
+                },
+            },
+        ]);
+
+        res.status(200).json({
+            success: true,
+            message: "dashboard data retrieved successfully",
+            data: {
+                totalCourses: courses.length,
+                totalStudents,
+                publishedCourse,
+                draftCoures,
+                totalDuration,
+                recentCourses,
+                revenue,
+            }
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: (error as Error).message
+        });
+    }
+}
+
 /**
  * @description Course Filter
  */
@@ -398,6 +447,7 @@ const courseController = {
     getCourseBySlug,
     updateCourse,
     deleteCourse,
+    educatorDashboard,
     filterCourses,
 }
 export default courseController;

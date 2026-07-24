@@ -31,6 +31,8 @@ courseRouter.patch("/:courseId", upload.single("thumbnail"), auth_middleware, ro
 // delete course
 courseRouter.delete("/:courseId", auth_middleware, roleMiddleware("educator", "admin"), courseController.deleteCourse);
 
+// educator dashboard
+courseRouter.get("/educator/dashboard", auth_middleware, roleMiddleware("educator", "admin"), courseController.educatorDashboard);
 /**
  * @description Course Filter  
  * @access public
