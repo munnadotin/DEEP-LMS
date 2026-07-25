@@ -5,6 +5,9 @@ import enrollController from "../controllers/enroll.controllert";
 
 const enrollRouter = Router();
 
+// verify enrollment
+enrollRouter.post("/verify", auth_middleware, roleMiddleware("student"), enrollController.verifyEnrollment);
+
 // Enroll a course
 enrollRouter.post("/:courseId", auth_middleware, roleMiddleware("student"), enrollController.enrollCourse);
 

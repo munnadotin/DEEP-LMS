@@ -4,12 +4,13 @@ import { Course } from "../model/course.model";
 import { Enroll } from "../model/enroll.model";
 import { Lesson } from "../model/lesson.model";
 import { Chapter } from "../model/chapter.model";
+import { razorpay } from "../config/razorpay";
+import crypto from "crypto";
 
 // Enroll a course
 const enrollCourse = async (req: Request, res: Response) => {
     try {
         const { courseId } = req.params;
-        const { paymentStatus } = req.body;
 
         const course = await Course.findById(courseId);
         // check if course exists
@@ -21,7 +22,7 @@ const enrollCourse = async (req: Request, res: Response) => {
         }
 
         // check if user already enrolled
-        const existingEnroll = await Enroll.findOne({ user: req.user._id, course: course._id });
+        const existingEnroll = await Enroll.findOne({ user: req.user._id, course: course._id, paymentStatus: "paid" });
 
         if (existingEnroll) {
             return res.status(400).json({
@@ -30,29 +31,97 @@ const enrollCourse = async (req: Request, res: Response) => {
             })
         }
 
+        const options = {
+            amount: course.price * 100,
+            currency: "INR",
+            receipt: `course_${course._id}`
+        }
+
+        const order = await razorpay.orders.create(options);
+
         // create new enroll
         const enroll = await Enroll.create({
             course: course._id,
+            educator: course.educator,
             user: req.user._id,
-            paymentStatus,
+            amount: course.price,
+            currency: "INR",
+            paymentGateway: "razorpay",
+            paymentStatus: "pending",
+            orderId: order.id
         });
 
-        // update enrolledStudents in Course
-        await Course.findByIdAndUpdate(courseId, {
-            $addToSet: {
-                enrolledStudents: req.user._id,
-            }
-        })
-        
         return res.status(201).json({
             success: true,
             message: "Course enrolled successfully",
-            data: enroll,
-        })
+            order,
+            enroll,
+            key: process.env.RAZORPAY_API_KEY
+        });
     } catch (error) {
         return res.status(500).json({
             success: false,
             message: "Failed to enroll course",
+            error: (error as Error).message,
+        })
+    }
+}
+
+// Verify course
+const verifyEnrollment = async (req: Request, res: Response) => {
+    try {
+        const {
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature,
+        } = req.body;
+
+        const body =
+            razorpay_order_id + "|" + razorpay_payment_id;
+
+        const expectedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_SECRET!)
+            .update(body.toString())
+            .digest("hex");
+
+        if (expectedSignature !== razorpay_signature) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Payment verification failed",
+            });
+        }
+
+        const enroll = await Enroll.findOne({
+            orderId: razorpay_order_id,
+        });
+
+        if (!enroll) {
+            return res.status(404).json({
+                success: false,
+                message: "Enrollment not found",
+            });
+        }
+
+        enroll.paymentStatus = "paid";
+        enroll.transactionId = razorpay_payment_id;
+
+        await enroll.save();
+
+        await Course.findByIdAndUpdate(enroll.course, {
+            $addToSet: {
+                enrolledStudents: enroll.user,
+            },
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Payment verified",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get enrollments",
             error: (error as Error).message,
         })
     }
@@ -225,6 +294,7 @@ const continueWatchCourse = async (req: Request, res: Response) => {
 
 const enrollController = {
     enrollCourse,
+    verifyEnrollment,
     getEnrollments,
     updateEnrollProgress,
     continueWatchCourse,

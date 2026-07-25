@@ -206,7 +206,8 @@ const getCourseBySlug = async (req: Request, res: Response) => {
         if (req.user) {
             isEnrolled = !!(await Enroll.exists({
                 course: course[0]._id,
-                user: req.user._id
+                user: req.user._id,
+                paymentStatus: "paid"
             }))
         }
 
