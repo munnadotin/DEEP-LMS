@@ -401,16 +401,15 @@ const filterCourses = async (req: Request, res: Response) => {
                 sortObj = { createdAt: 1 };
                 break;
             case "price-low":
-                sortObj = { price: -1 };
+                sortObj = { price: 1 };
                 break;
-            case "level-high":
-                sortObj = { level: 1 };
+            case "price-high":
+                sortObj = { price: -1 };
                 break;
             default:
                 sortObj = { createdAt: -1 };
                 break;
         }
-
         const courses = await Course.find({ ...query, published: "published" })
             .sort(sortObj)
             .skip((page as number - 1) * (limit as number))
@@ -419,16 +418,19 @@ const filterCourses = async (req: Request, res: Response) => {
 
         const total = await Course.countDocuments(query);
         const totalPages = Math.ceil(total / (limit as number));
-        const currentPage = page as number;
 
         return res.status(200).json({
             success: true,
             message: "Courses Retrieved",
             courses,
-            total,
-            totalPages,
-            currentPage,
-            limit: limit as number,
+            pagination: {
+                page,
+                limit,
+                totalCourse: total,
+                totalPages,
+                hasNextPage: (page as number) < totalPages,
+                hasPrevPage: (page as number) > 1,
+            }
         });
 
     } catch (error) {

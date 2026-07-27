@@ -6,8 +6,9 @@ import { redis } from '../config/redis';
 import jwt from 'jsonwebtoken';
 
 const registerUser = async (req: Request, res: Response) => {
-    const { name, email, password, role } = req.body;
     try {
+        const { name, email, password, role } = req.body;
+
         // check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {

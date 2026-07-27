@@ -10,6 +10,13 @@ import { optionalMiddleware } from '../middlewares/optional.middleware';
 
 const courseRouter = Router();
 
+/**
+ * @description Course Filter
+ * @access public
+ * @method GET
+ */
+courseRouter.get("/", courseController.filterCourses);
+
 // create course
 courseRouter.post("/create", upload.single("thumbnail"), auth_middleware, roleMiddleware("educator"), validate(courseSchema), courseController.createCourse);
 
@@ -33,12 +40,6 @@ courseRouter.delete("/:courseId", auth_middleware, roleMiddleware("educator", "a
 
 // educator dashboard
 courseRouter.get("/educator/dashboard", auth_middleware, roleMiddleware("educator", "admin"), courseController.educatorDashboard);
-/**
- * @description Course Filter  
- * @access public
- * @method GET
- */
-courseRouter.get("/", courseController.filterCourses);
 
 /**
  * @desciption Chapter Routes
