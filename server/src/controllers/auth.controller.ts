@@ -47,8 +47,7 @@ const registerUser = async (req: Request, res: Response) => {
                 name,
                 email,
                 role,
-            },
-            verificationLink,
+            }
         })
     } catch (error) {
         res.status(500).json({
