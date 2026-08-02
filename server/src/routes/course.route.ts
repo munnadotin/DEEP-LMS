@@ -7,6 +7,7 @@ import courseSchema from '../validations/course.validation';
 import upload from '../middlewares/upload';
 import chapterRouter from './chapter.route';
 import { optionalMiddleware } from '../middlewares/optional.middleware';
+import reviewController from '../controllers/review.controller';
 
 const courseRouter = Router();
 
@@ -37,6 +38,27 @@ courseRouter.patch("/:courseId", upload.single("thumbnail"), auth_middleware, ro
 
 // delete course
 courseRouter.delete("/:courseId", auth_middleware, roleMiddleware("educator", "admin"), courseController.deleteCourse);
+
+/**
+ * @description Course Review
+ * @access private
+ * @member students only
+ */
+// create review
+courseRouter.post("/:courseId/reviews", auth_middleware, roleMiddleware("student"), reviewController.createReview);
+
+// get all reviews by courseId
+courseRouter.get("/:courseId/reviews", auth_middleware, roleMiddleware("student", "educator", "admin"), reviewController.getReview);
+
+// update review
+courseRouter.put("/:courseId/review/:reviewId", auth_middleware, roleMiddleware("student"), reviewController.updateReview);
+
+// delete review
+courseRouter.delete("/:courseId/review/:reviewId", auth_middleware, roleMiddleware("student"), reviewController.deleteReview);
+/**
+ * @description Dashboard for Educator
+ * @access private
+ */
 
 // educator dashboard
 courseRouter.get("/educator/dashboard", auth_middleware, roleMiddleware("educator", "admin"), courseController.educatorDashboard);
