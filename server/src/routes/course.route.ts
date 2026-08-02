@@ -48,7 +48,7 @@ courseRouter.delete("/:courseId", auth_middleware, roleMiddleware("educator", "a
 courseRouter.post("/:courseId/reviews", auth_middleware, roleMiddleware("student"), reviewController.createReview);
 
 // get all reviews by courseId
-courseRouter.get("/:courseId/reviews", auth_middleware, roleMiddleware("student", "educator", "admin"), reviewController.getReview);
+courseRouter.get("/:courseId/reviews", reviewController.getReview);
 
 // update review
 courseRouter.put("/:courseId/review/:reviewId", auth_middleware, roleMiddleware("student"), reviewController.updateReview);

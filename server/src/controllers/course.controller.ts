@@ -4,6 +4,7 @@ import storageService from "../services/storage.service";
 import { Category } from "../model/category.model";
 import { Enroll } from "../model/enroll.model";
 import { Chapter, Lesson } from "../types/Course.type";
+import { Review } from "../model/review.model";
 
 // create course
 const createCourse = async (req: Request, res: Response) => {
@@ -194,12 +195,15 @@ const getCourseBySlug = async (req: Request, res: Response) => {
             }
         ])
 
-        if (!course) {
+        if (course.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: "Course Not Found or Not Published",
+                message: "Course Not Found",
             });
         }
+
+        // show review
+        const review = await Review.find({ course: course[0]._id }).populate("user", "name");
 
         let isEnrolled = false;
 
@@ -219,7 +223,7 @@ const getCourseBySlug = async (req: Request, res: Response) => {
             }))
         }));
 
-        const findedCourse = { ...course[0], isEnrolled, chapters: updatedChpaters }
+        const findedCourse = { ...course[0], isEnrolled, chapters: updatedChpaters, review }
 
         return res.status(200).json({
             success: true,

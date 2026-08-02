@@ -43,10 +43,6 @@ const courseSchema = new mongoose.Schema({
         ref: "User",
         default: [],
     },
-    ratings: {
-        type: Number,
-        default: 0,
-    },
     averageRating: {
         type: Number,
         default: 0,

@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { Review } from '../model/review.model';
+import { Course } from '../model/course.model';
+import mongoose from 'mongoose';
 
-// create review on courses
+// create review on course
 const createReview = async (req: Request, res: Response) => {
     try {
         const { courseId } = req.params;
@@ -22,7 +24,8 @@ const createReview = async (req: Request, res: Response) => {
             })
         }
 
-        const courseExists = await Review.findOne({ course: courseId });
+        const courseExists = await Course.findOne({ _id: courseId });
+
         if (!courseExists) {
             return res.status(404).json({
                 success: false,
@@ -40,7 +43,7 @@ const createReview = async (req: Request, res: Response) => {
 
         const result = await Review.aggregate([
             {
-                $match: { course: courseId }
+                $match: { course: new mongoose.Types.ObjectId(courseId as string) }
             },
             {
                 $group: {
@@ -49,7 +52,7 @@ const createReview = async (req: Request, res: Response) => {
                     totalReviews: { $sum: 1 }
                 }
             }
-        ])
+        ]);
 
         // update course review stats
         await courseExists.updateOne({
@@ -74,7 +77,22 @@ const createReview = async (req: Request, res: Response) => {
 // get all reviews by courseId
 const getReview = async (req: Request, res: Response) => {
     try {
+        const { courseId } = req.params;
 
+        if (!courseId) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields",
+            })
+        }
+
+        const reviews = await Review.find({ course: courseId }).populate('user', 'name email');
+
+        return res.status(200).json({
+            success: true,
+            message: "Reviews fetched successfully",
+            data: reviews
+        })
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -87,7 +105,30 @@ const getReview = async (req: Request, res: Response) => {
 // update review by (course or review id)
 const updateReview = async (req: Request, res: Response) => {
     try {
+        const { courseId, reviewId } = req.params;
+        const { rating, comment } = req.body;
 
+        if (!courseId || !reviewId) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields",
+            })
+        }
+
+        const review = await Review.findByIdAndUpdate(reviewId, { rating, comment }, { new: true });
+
+        if (!review) {
+            return res.status(404).json({
+                success: false,
+                message: "Review not found",
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Review updated successfully",
+            data: review
+        })
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -100,7 +141,29 @@ const updateReview = async (req: Request, res: Response) => {
 // delete review by (course or review id)
 const deleteReview = async (req: Request, res: Response) => {
     try {
+        const { courseId, reviewId } = req.params;
 
+        if (!courseId || !reviewId) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required fields",
+            })
+        }
+
+        const review = await Review.findByIdAndDelete(reviewId);
+
+        if (!review) {
+            return res.status(404).json({
+                success: false,
+                message: "Review not found",
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Review deleted successfully",
+            data: review
+        })
     } catch (error) {
         return res.status(500).json({
             success: false,
