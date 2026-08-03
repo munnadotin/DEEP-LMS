@@ -5,6 +5,7 @@ import { Category } from "../model/category.model";
 import { Enroll } from "../model/enroll.model";
 import { Chapter, Lesson } from "../types/Course.type";
 import { Review } from "../model/review.model";
+import { redis } from "../config/redis";
 
 // create course
 const createCourse = async (req: Request, res: Response) => {
@@ -63,7 +64,20 @@ const createCourse = async (req: Request, res: Response) => {
 const getAllCourses = async (_req: Request, res: Response) => {
     try {
         // return all courses with published status
+        // cache hit
+        const cachedCourses = await redis.get("courses");
+
+        if (cachedCourses) {
+            return res.status(200).json({
+                success: true,
+                message: "Courses Retrieved from Cache",
+                courses: JSON.parse(cachedCourses)
+            })
+        }
         const courses = await Course.find({ published: "published" }).populate("educator", "name");
+
+        // cache miss
+        await redis.set("courses", JSON.stringify(courses), "EX", 60 * 60); // cache for 1 hour
 
         return res.status(200).json({
             success: true,
@@ -105,7 +119,7 @@ const getAllCoursesByEducator = async (req: Request, res: Response) => {
         const courses = await Course.find({ educator: req.user._id, published: "published" });
 
         return res.status(200).json({
-            success: false,
+            success: true,
             message: "Courses Retrieved Successfully",
             courses
         })
@@ -129,6 +143,17 @@ const getCourseBySlug = async (req: Request, res: Response) => {
                 success: false,
                 message: "Course slug is required",
             });
+        }
+
+        // cache hit
+        const cachedCourse = await redis.get(`course:${slug}`);
+
+        if (cachedCourse) {
+            return res.status(200).json({
+                status: true,
+                message: "Course Retrieved from cache",
+                course: JSON.parse(cachedCourse),
+            })
         }
 
         const course = await Course.aggregate([
@@ -202,6 +227,12 @@ const getCourseBySlug = async (req: Request, res: Response) => {
             });
         }
 
+        let duration = 0;
+        duration = course[0].chapters.reduce((total: number, chapter: Chapter) => {
+            const chapterDuration = chapter.lessons.reduce((chapterTotal: number, lesson: Lesson) => chapterTotal + lesson.duration, 0);
+            return total + chapterDuration;
+        }, 0);
+
         // show review
         const review = await Review.find({ course: course[0]._id }).populate("user", "name");
 
@@ -223,11 +254,14 @@ const getCourseBySlug = async (req: Request, res: Response) => {
             }))
         }));
 
-        const findedCourse = { ...course[0], isEnrolled, chapters: updatedChpaters, review }
+        const findedCourse = { ...course[0], isEnrolled, chapters: updatedChpaters, review, duration }
+
+        // cache miss 
+        await redis.set(`course:${slug}`, JSON.stringify(findedCourse), "EX", 60 * 60);
 
         return res.status(200).json({
             success: true,
-            message: "Course Retrieved",
+            message: "Course Retrieved from database",
             course: findedCourse,
         });
     } catch (error) {
@@ -395,6 +429,8 @@ const filterCourses = async (req: Request, res: Response) => {
             query.category = categories?._id;
         }
 
+        // const cachedCourse = await redis.set(``)
+
         // sort
         let sortObj = {} as any;
         switch (sort as string) {
@@ -422,19 +458,20 @@ const filterCourses = async (req: Request, res: Response) => {
 
         const total = await Course.countDocuments(query);
         const totalPages = Math.ceil(total / (limit as number));
+        const pagination = {
+            page,
+            limit,
+            totalCourse: total,
+            totalPages,
+            hasNextPage: (page as number) < totalPages,
+            hasPrevPage: (page as number) > 1,
+        }
 
         return res.status(200).json({
             success: true,
             message: "Courses Retrieved",
             courses,
-            pagination: {
-                page,
-                limit,
-                totalCourse: total,
-                totalPages,
-                hasNextPage: (page as number) < totalPages,
-                hasPrevPage: (page as number) > 1,
-            }
+            pagination
         });
 
     } catch (error) {
