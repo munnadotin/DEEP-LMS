@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Category } from "../model/category.model";
+import { redis } from "../config/redis";
 
 // create category
 const createCategory = async (req: Request, res: Response) => {
@@ -12,6 +13,9 @@ const createCategory = async (req: Request, res: Response) => {
             });
         }
         const category = await Category.create({ name, slug: name.toLowerCase().replace(/\s+/g, "-") });
+
+        await redis.del("category:all");
+
         return res.status(201).json({
             success: true,
             message: "Category Created",
@@ -29,10 +33,25 @@ const createCategory = async (req: Request, res: Response) => {
 // get all categories
 const getAllCategories = async (_req: Request, res: Response) => {
     try {
+        // cache hit
+        const cachedCategory = await redis.get("category:all");
+
+        if (cachedCategory) {
+            return res.status(200).json({
+                success: true,
+                message: "Categories Fetched from cache",
+                categories: JSON.parse(cachedCategory),
+            })
+        }
+
         const categories = await Category.find();
+
+        // cache miss
+        await redis.set("category:all", JSON.stringify(categories), "EX", 60 * 60); // 1 hour
+
         return res.status(200).json({
             success: true,
-            message: "Categories Fetched",
+            message: "Categories Fetched from database",
             categories,
         });
     } catch (error) {
@@ -48,6 +67,18 @@ const getAllCategories = async (_req: Request, res: Response) => {
 const getCategoryById = async (req: Request, res: Response) => {
     try {
         const { slug } = req.params;
+        // cache hit
+        const cachedCategory = await redis.get(`category:${slug}`);
+
+        if (cachedCategory) {
+            return res.status(200).json({
+                status: true,
+                message: "Categories Fetched from cache",
+                category: JSON.parse(cachedCategory)
+            })
+        }
+
+        // validate
         if (!slug) {
             return res.status(400).json({
                 success: false,
@@ -63,10 +94,12 @@ const getCategoryById = async (req: Request, res: Response) => {
                 message: "Category Not Found",
             });
         }
+        // cache miss
+        await redis.set(`category:${slug}`, JSON.stringify(category), "EX", 60 * 60); // 1 hour
 
         return res.status(200).json({
             success: true,
-            message: "Category Fetched",
+            message: "Category Fetched from databse",
             category,
         });
     } catch (error) {
@@ -96,12 +129,18 @@ const updateCategory = async (req: Request, res: Response) => {
             });
         }
         const category = await Category.findOneAndUpdate({ slug }, { name, slug: name.toLowerCase().replace(/\s+/g, "-") }, { returnDocument: "after" });
+
         if (!category) {
             return res.status(404).json({
                 success: false,
                 message: "Category Not Found",
             });
         }
+
+        // update category in cache
+        await redis.del(`category:${slug}`);
+        await redis.del("category:all");
+
         return res.status(200).json({
             success: true,
             message: "Category Updated",
@@ -133,6 +172,11 @@ const deleteCategory = async (req: Request, res: Response) => {
                 message: "Category Not Found",
             });
         }
+
+        // del category from cache
+        await redis.del(`category:${slug}`);
+        await redis.del("category:all");
+
         return res.status(200).json({
             success: true,
             message: "Category Deleted",
