@@ -99,9 +99,23 @@ const getAllDraftCourse = async (req: Request, res: Response) => {
         // return all courses with draft status
         const courses = await Course.find({ published: "draft", educator: req.user._id }).populate("educator", "name");
 
+        // cache hit
+        const cachedCourses = await redis.get(`educator:draft:courses:${req.user._id}`);
+
+        if (cachedCourses) {
+            return res.status(200).json({
+                status: true,
+                message: "Draft Courses Retrieved from cache",
+                courses: JSON.parse(cachedCourses)
+            })
+        }
+
+        // cache miss
+        await redis.set(`educator:draft:courses:${req.user._id}`, JSON.stringify(courses), "EX", 60 * 60);
+
         return res.status(200).json({
             success: true,
-            message: "Courses Retrieved with Published Status",
+            message: "Courses Retrieved from database",
             courses,
         });
     } catch (error) {
@@ -117,10 +131,23 @@ const getAllDraftCourse = async (req: Request, res: Response) => {
 const getAllCoursesByEducator = async (req: Request, res: Response) => {
     try {
         const courses = await Course.find({ educator: req.user._id, published: "published" });
+        // cache hit
+        const cachedCourse = await redis.get(`educator:courses:${req.user._id}`);
+
+        if (cachedCourse) {
+            return res.status(200).json({
+                status: true,
+                message: "Courses Retrieved Successfully from cache",
+                courses: JSON.parse(cachedCourse)
+            })
+        }
+
+        // cache miss
+        await redis.set(`educator:courses:${req.user._id}`, JSON.stringify(courses), "EX", 60 * 60); // 1 hour
 
         return res.status(200).json({
             success: true,
-            message: "Courses Retrieved Successfully",
+            message: "Courses Retrieved Successfully from database",
             courses
         })
     }
@@ -314,6 +341,9 @@ const updateCourse = async (req: Request, res: Response) => {
         course.published = published || course.published;
 
         await course.save();
+
+        await redis.set(`course:${course.slug}`, JSON.stringify(course), "EX", 60 * 60); // 1 hour
+
         return res.status(200).json({
             success: true,
             message: "Course Updated",
@@ -345,6 +375,10 @@ const deleteCourse = async (req: Request, res: Response) => {
         }
         // delete course from database
         await course.deleteOne({ _id: courseId });
+
+        // del course from cache
+        await redis.del(`course:${course.slug}`);
+
         return res.status(200).json({
             success: true,
             message: "Course Deleted",
@@ -429,7 +463,17 @@ const filterCourses = async (req: Request, res: Response) => {
             query.category = categories?._id;
         }
 
-        // const cachedCourse = await redis.set(``)
+        const cacheKey = JSON.stringify(req.query);
+
+        // cache hit
+        const cachedCourse = await redis.get(cacheKey);
+        if (cachedCourse) {
+            return res.status(200).json({
+                status: true,
+                message: "Course Retrieved from Cache",
+                course: JSON.parse(cachedCourse)
+            })
+        }
 
         // sort
         let sortObj = {} as any;
@@ -467,12 +511,17 @@ const filterCourses = async (req: Request, res: Response) => {
             hasPrevPage: (page as number) > 1,
         }
 
-        return res.status(200).json({
+        const response = {
             success: true,
-            message: "Courses Retrieved",
+            message: "Course Retrieved from database",
             courses,
             pagination
-        });
+        };
+
+        // cache miss
+        await redis.set(cacheKey, JSON.stringify(response), "EX", 600); // 10 min
+
+        return res.status(200).json(response);
 
     } catch (error) {
         return res.status(500).json({
