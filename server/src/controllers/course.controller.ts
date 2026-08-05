@@ -46,6 +46,9 @@ const createCourse = async (req: Request, res: Response) => {
             educator: req.user._id,
         })
 
+        // del courses from cache
+        await redis.del("courses");
+
         return res.status(201).json({
             success: true,
             message: "Course Created",
@@ -132,7 +135,7 @@ const getAllCoursesByEducator = async (req: Request, res: Response) => {
     try {
         const courses = await Course.find({ educator: req.user._id, published: "published" });
         // cache hit
-        const cachedCourse = await redis.get(`educator:courses:${req.user._id}`);
+        const cachedCourse = await redis.get(`educator:publish:courses:${req.user._id}`);
 
         if (cachedCourse) {
             return res.status(200).json({
@@ -143,7 +146,7 @@ const getAllCoursesByEducator = async (req: Request, res: Response) => {
         }
 
         // cache miss
-        await redis.set(`educator:courses:${req.user._id}`, JSON.stringify(courses), "EX", 60 * 60); // 1 hour
+        await redis.set(`educator:publish:courses:${req.user._id}`, JSON.stringify(courses), "EX", 60 * 60); // 1 hour
 
         return res.status(200).json({
             success: true,
@@ -176,10 +179,34 @@ const getCourseBySlug = async (req: Request, res: Response) => {
         const cachedCourse = await redis.get(`course:${slug}`);
 
         if (cachedCourse) {
+            const course = JSON.parse(cachedCourse);
+
+            let isEnrolled = false;
+
+            if (req.user) {
+                isEnrolled = !!(await Enroll.exists({
+                    course: course._id,
+                    user: req.user._id,
+                    paymentStatus: "paid"
+                }))
+            }
+
+            const updatedChapters = course.chapters.map((chapter: Chapter) => ({
+                ...chapter,
+                lessons: chapter.lessons.map((lesson: Lesson) => ({
+                    ...lesson,
+                    isFree: isEnrolled ? true : lesson.isFree
+                }))
+            }));
+
             return res.status(200).json({
                 status: true,
                 message: "Course Retrieved from cache",
-                course: JSON.parse(cachedCourse),
+                course: {
+                    ...course,
+                    isEnrolled,
+                    chapters: updatedChapters
+                }
             })
         }
 
@@ -263,25 +290,7 @@ const getCourseBySlug = async (req: Request, res: Response) => {
         // show review
         const review = await Review.find({ course: course[0]._id }).populate("user", "name");
 
-        let isEnrolled = false;
-
-        if (req.user) {
-            isEnrolled = !!(await Enroll.exists({
-                course: course[0]._id,
-                user: req.user._id,
-                paymentStatus: "paid"
-            }))
-        }
-
-        const updatedChpaters = course[0].chapters.map((chapter: Chapter) => ({
-            ...chapter,
-            lessons: chapter.lessons.map((lesson: Lesson) => ({
-                ...lesson,
-                isFree: isEnrolled ? true : lesson.isFree
-            }))
-        }));
-
-        const findedCourse = { ...course[0], isEnrolled, chapters: updatedChpaters, review, duration }
+        const findedCourse = { ...course[0], review, duration }
 
         // cache miss 
         await redis.set(`course:${slug}`, JSON.stringify(findedCourse), "EX", 60 * 60);
@@ -342,7 +351,12 @@ const updateCourse = async (req: Request, res: Response) => {
 
         await course.save();
 
-        await redis.set(`course:${course.slug}`, JSON.stringify(course), "EX", 60 * 60); // 1 hour
+        await Promise.all([
+            redis.set(`course:${course.slug}`, JSON.stringify(course), "EX", 60 * 60),  // 1 hour
+            redis.del(`educator:draft:courses:${req.user._id}`),
+            redis.del(`educator:publish:courses:${req.user._id}`),
+            redis.del(`courses`),
+        ]);
 
         return res.status(200).json({
             success: true,
@@ -377,7 +391,12 @@ const deleteCourse = async (req: Request, res: Response) => {
         await course.deleteOne({ _id: courseId });
 
         // del course from cache
-        await redis.del(`course:${course.slug}`);
+        await Promise.all([
+            redis.del(`course:${course.slug}`),
+            redis.del(`educator:publish:courses:${req.user._id}`),
+            redis.del(`educator:draft:courses:${req.user._id}`),
+            redis.del("courses"),
+        ])
 
         return res.status(200).json({
             success: true,
@@ -519,7 +538,7 @@ const filterCourses = async (req: Request, res: Response) => {
         };
 
         // cache miss
-        await redis.set(cacheKey, JSON.stringify(response), "EX", 600); // 10 min
+        await redis.set(cacheKey, JSON.stringify(response), "EX", 300); // 5 min
 
         return res.status(200).json(response);
 
