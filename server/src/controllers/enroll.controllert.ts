@@ -121,7 +121,7 @@ const verifyEnrollment = async (req: Request, res: Response) => {
 // Get user enrollments
 const getEnrollments = async (req: Request, res: Response) => {
     try {
-        const enrollments = await Enroll.find({ user: req.user._id }).populate({
+        const enrollments = await Enroll.find({ user: req.user._id, paymentStatus: "paid" }).populate({
             path: "course",
             select: "title slug price thumbnail description",
         }).populate({ path: "lastLessonCompleted", select: "title" });

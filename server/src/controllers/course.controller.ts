@@ -175,41 +175,6 @@ const getCourseBySlug = async (req: Request, res: Response) => {
             });
         }
 
-        // cache hit
-        const cachedCourse = await redis.get(`course:${slug}`);
-
-        if (cachedCourse) {
-            const course = JSON.parse(cachedCourse);
-
-            let isEnrolled = false;
-
-            if (req.user) {
-                isEnrolled = !!(await Enroll.exists({
-                    course: course._id,
-                    user: req.user._id,
-                    paymentStatus: "paid"
-                }))
-            }
-
-            const updatedChapters = course.chapters.map((chapter: Chapter) => ({
-                ...chapter,
-                lessons: chapter.lessons.map((lesson: Lesson) => ({
-                    ...lesson,
-                    isFree: isEnrolled ? true : lesson.isFree
-                }))
-            }));
-
-            return res.status(200).json({
-                status: true,
-                message: "Course Retrieved from cache",
-                course: {
-                    ...course,
-                    isEnrolled,
-                    chapters: updatedChapters
-                }
-            })
-        }
-
         const course = await Course.aggregate([
             {
                 $match: {
@@ -290,10 +255,25 @@ const getCourseBySlug = async (req: Request, res: Response) => {
         // show review
         const review = await Review.find({ course: course[0]._id }).populate("user", "name");
 
-        const findedCourse = { ...course[0], review, duration }
+        let isEnrolled = false;
 
-        // cache miss 
-        await redis.set(`course:${slug}`, JSON.stringify(findedCourse), "EX", 60 * 60);
+        if (req.user) {
+            isEnrolled = !!(await Enroll.exists({
+                course: course[0]._id,
+                user: req.user._id,
+                paymentStatus: "paid"
+            }))
+        }
+
+        const updatedChapters = course[0].chapters.map((chapter: Chapter) => ({
+            ...chapter,
+            lessons: chapter.lessons.map((lesson: Lesson) => ({
+                ...lesson,
+                isFree: isEnrolled ? true : lesson.isFree
+            }))
+        }));
+
+        const findedCourse = { ...course[0], review, duration, isEnrolled, chapters: updatedChapters };
 
         return res.status(200).json({
             success: true,
@@ -352,7 +332,6 @@ const updateCourse = async (req: Request, res: Response) => {
         await course.save();
 
         await Promise.all([
-            redis.set(`course:${course.slug}`, JSON.stringify(course), "EX", 60 * 60),  // 1 hour
             redis.del(`educator:draft:courses:${req.user._id}`),
             redis.del(`educator:publish:courses:${req.user._id}`),
             redis.del(`courses`),
@@ -392,7 +371,6 @@ const deleteCourse = async (req: Request, res: Response) => {
 
         // del course from cache
         await Promise.all([
-            redis.del(`course:${course.slug}`),
             redis.del(`educator:publish:courses:${req.user._id}`),
             redis.del(`educator:draft:courses:${req.user._id}`),
             redis.del("courses"),
