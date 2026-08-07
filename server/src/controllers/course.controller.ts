@@ -47,7 +47,10 @@ const createCourse = async (req: Request, res: Response) => {
         })
 
         // del courses from cache
-        await redis.del("courses");
+        await Promise.all([
+            redis.del("courses"),
+            redis.del(`educator:draft:courses:${req.user._id}`)
+        ])
 
         return res.status(201).json({
             success: true,
@@ -100,25 +103,24 @@ const getAllCourses = async (_req: Request, res: Response) => {
 const getAllDraftCourse = async (req: Request, res: Response) => {
     try {
         // return all courses with draft status
-        const courses = await Course.find({ published: "draft", educator: req.user._id }).populate("educator", "name");
-
-        // cache hit
+        // cache hit 
         const cachedCourses = await redis.get(`educator:draft:courses:${req.user._id}`);
 
         if (cachedCourses) {
             return res.status(200).json({
                 status: true,
-                message: "Draft Courses Retrieved from cache",
-                courses: JSON.parse(cachedCourses)
+                message: "Draft courses retrieved from cache",
+                courses: JSON.parse(cachedCourses),
             })
         }
+        const courses = await Course.find({ published: "draft", educator: req.user._id }).populate("educator", "name");
 
         // cache miss
-        await redis.set(`educator:draft:courses:${req.user._id}`, JSON.stringify(courses), "EX", 60 * 60);
+        await redis.set(`educator:draft:courses:${req.user._id}`, JSON.stringify(courses), "EX", 300);
 
         return res.status(200).json({
             success: true,
-            message: "Courses Retrieved from database",
+            message: "Courses Retrieved",
             courses,
         });
     } catch (error) {
