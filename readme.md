@@ -56,7 +56,7 @@ RAZORPAY_SECRET_KEY=xxxxxxx
 #### 1. Clone the repository
 
 ```bash
-git clone https://github.com/munnadotin/Learning-Management-System-LMS-
+git clone https://github.com/munnadotin/DEEP-LMS
 cd deep-lms
 ```
 
