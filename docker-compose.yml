@@ -1,10 +1,24 @@
-services: 
-  redis: 
+services:
+  client:
+    build: ./client
+    env_file:
+      - ./client/.env
+    ports:
+      - "3000:3000"
+
+  server:
+    build: ./server
+    env_file:
+      - ./server/.env
+    ports:
+      - "5000:5000"
+
+  redis:
     image: redis:7-alpine
     container_name: redis
-    ports: 
+    ports:
       - "6379:6379"
-    command: ["redis-server", "--appendonly", "yes"]
+    command: [ "redis-server", "--appendonly", "yes" ]
     volumes:
       - redis-data:/data
 
