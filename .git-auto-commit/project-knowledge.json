@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "frameworks": [],
+  "topLevelDirs": [
+    "client",
+    "server"
+  ],
+  "moduleMap": {
+    "client": "project module",
+    "server": "project module"
+  },
+  "dependencies": [],
+  "lastUpdated": 1786331348616
+}
