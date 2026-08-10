@@ -33,9 +33,11 @@ The project is built with a focus on **clean backend architecture, role-based ac
 - GitHub
 - Postman
 ## Frontend Environment variables
+```
 NEXT_PUBLIC_SERVER_URL = http://localhost:5000
-
+```
 ## Backend Environment variables
+```
 PORT=5000
 MONGODB_URL=mongodb+srv://xxxx.mongodb.net/LMS
 JWT_SECRET=xxxxxx
@@ -48,13 +50,13 @@ SMTP_PASS=xxxx xxxx xxxx xxxx
 imageKitPrivateKey=private_xxxxxxxx=
 RAZORPAY_API_KEY=rzp_test_xxxxxx
 RAZORPAY_SECRET_KEY=xxxxxxx
-
+```
 ### Setup
 
 #### 1. Clone the repository
 
 ```bash
-git clone https://github.com/munnadotin/Learning-Management-System-LMS-
+git clone https://github.com/munnadotin/DEEP-LMS
 cd deep-lms
 ```
 
