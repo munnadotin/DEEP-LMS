@@ -22,7 +22,7 @@ const registerUser = async (req: Request, res: Response) => {
             name,
             email,
             password,
-            role,
+            role: 'student',
         });
 
         // generate link for verification
