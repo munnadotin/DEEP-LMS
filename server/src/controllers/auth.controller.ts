@@ -265,6 +265,7 @@ const getMe = async (req: Request, res: Response) => {
 const apply = async (req: Request, res: Response) => {
     try {
         const { headline, bio } = req.body;
+        console.log(headline, bio)
 
         const educator = await Educator.findOne({ user: req.user._id });
 
@@ -311,10 +312,10 @@ const apply = async (req: Request, res: Response) => {
             success: true,
             message: "Thanks for applying. Your application is now under review",
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({
             success: false,
-            message: "Internal server error",
+            message: error.message,
         })
     }
 }

@@ -66,22 +66,23 @@ export const authReducer = baseApi.injectEndpoints({
         }),
         // apply for educator role
         applyEducator: builder.mutation({
-            query: () => ({
+            query: (data: { headline: string, bio: string }) => ({
                 url: ENDPOINTS.Student.APPLY_FOR_EDUCATOR,
                 method: "POST",
+                body: data
             }),
             invalidatesTags: ["Auth"]
         }),
         // check application status
-        checkApplication: builder.mutation({
+        checkApplication: builder.query<any, void>({
             query: () => ({
                 url: ENDPOINTS.Student.CHECK_APPLICATION,
                 method: "GET",
-                providesTags: ["Auth"]
             }),
+            providesTags: ["Auth"]
         })
     })
 })
 
 
-export const { useLoginMutation, useRegisterUserMutation, useGetMeQuery, useLogOutMutation, useVerifyAccountQuery, useGetApplicationsQuery, useApproveApplicationMutation, useRejectApplicationMutation, useApplyEducatorMutation, useCheckApplicationMutation } = authReducer;
+export const { useLoginMutation, useRegisterUserMutation, useGetMeQuery, useLogOutMutation, useVerifyAccountQuery, useGetApplicationsQuery, useApproveApplicationMutation, useRejectApplicationMutation, useApplyEducatorMutation, useCheckApplicationQuery } = authReducer;

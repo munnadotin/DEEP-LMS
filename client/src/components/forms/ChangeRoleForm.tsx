@@ -4,21 +4,43 @@ import { EducatorType } from "@/types/Form.type";
 import toast from "react-hot-toast";
 import { AlertCircle, Send } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { useApplyEducatorMutation } from "@/redux/features/authApi";
+import { useApplyEducatorMutation, useCheckApplicationQuery } from "@/redux/features/authApi";
+import useAuth from "@/hooks/useAuth";
+import Loader from "../ui/Loader";
+import { useEffect } from "react";
 
 export default function ChangeRoleForm() {
+    const { user } = useAuth();
     const { register, handleSubmit, formState: { errors, isSubmitting }, reset, } = useForm<EducatorType>();
     const [applyEducator, { isLoading }] = useApplyEducatorMutation();
+    const { data, isLoading: applicationLoading } = useCheckApplicationQuery(undefined, {
+        skip: !user
+    });
+    
+
+    useEffect(() => {
+        if (data?.success === true) {
+            toast.success(data?.message, {
+                duration: 5000
+            });
+        }
+    }, [data]);
 
     const onSubmit = async (data: EducatorType) => {
         try {
-            const res = await applyEducator(data);
-            console.log(res);
-            toast.success("Application submitted successfully!");
+            const res = await applyEducator(data).unwrap();
+            toast.success(res.message, {
+                duration: 5000
+            });
+            reset();
         } catch (error: any) {
             toast.error(error?.data?.message || "Failed to submit application.");
         }
     };
+
+    if (applicationLoading) {
+        return <Loader />;
+    }
 
     return (
         <div className="max-w-md mx-auto p-6 text-[#3D2F24] rounded-xl border border-[#E6DFD5] tracking-tight">
@@ -46,7 +68,7 @@ export default function ChangeRoleForm() {
                     <input
                         id="headline"
                         type="text"
-                        placeholder="e.g. Senior Coffee Roaster & Barista Trainer"
+                        placeholder="e.g. Senior Software Developer"
                         {...register("headline", { required: "Headline is required" })}
                         className="w-full px-3.5 py-2.5 text-xs font-medium bg-white border border-[#E6DFD5] text-[#3D2F24] rounded-md focus:outline-none focus:border-[#8C6D53] focus:ring-1 focus:ring-[#8C6D53] placeholder:text-[#C2B7AC]"
                     />
