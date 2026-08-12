@@ -39,9 +39,49 @@ export const authReducer = baseApi.injectEndpoints({
                 method: "GET",
             }),
             providesTags: ["Auth"]
+        }),
+        // get all applications
+        getApplications: builder.query<any, void>({
+            query: () => ({
+                url: ENDPOINTS.Admin.GET_APPLICATIONS,
+                method: "GET",
+            }),
+            providesTags: ["Auth"]
+        }),
+        // approve user application
+        approveApplication: builder.mutation({
+            query: (id: string) => ({
+                url: ENDPOINTS.Admin.APPROVE_APPLICATIONS(id),
+                method: "PATCH",
+            }),
+            invalidatesTags: ["Auth"]
+        }),
+        // reject user application
+        rejectApplication: builder.mutation({
+            query: (id: string) => ({
+                url: ENDPOINTS.Admin.REJECT_APPLICATIONS(id),
+                method: "PATCH",
+            }),
+            invalidatesTags: ["Auth"]
+        }),
+        // apply for educator role
+        applyEducator: builder.mutation({
+            query: () => ({
+                url: ENDPOINTS.Student.APPLY_FOR_EDUCATOR,
+                method: "POST",
+            }),
+            invalidatesTags: ["Auth"]
+        }),
+        // check application status
+        checkApplication: builder.mutation({
+            query: () => ({
+                url: ENDPOINTS.Student.CHECK_APPLICATION,
+                method: "GET",
+                providesTags: ["Auth"]
+            }),
         })
     })
 })
 
 
-export const { useLoginMutation, useRegisterUserMutation, useGetMeQuery, useLogOutMutation, useVerifyAccountQuery } = authReducer;
+export const { useLoginMutation, useRegisterUserMutation, useGetMeQuery, useLogOutMutation, useVerifyAccountQuery, useGetApplicationsQuery, useApproveApplicationMutation, useRejectApplicationMutation, useApplyEducatorMutation, useCheckApplicationMutation } = authReducer;

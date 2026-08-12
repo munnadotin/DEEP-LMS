@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { useEducatorDashboardQuery } from "@/redux/features/courseApi"
-import { BookOpen, Users, CheckCircle2, FileEdit, Clock, TrendingUp, Plus, Eye, ArrowRight, Loader2, } from "lucide-react";
+import { BookOpen, Users, CheckCircle2, FileEdit, Clock, TrendingUp, Plus, Eye, ArrowRight, Loader2, DollarSign, } from "lucide-react";
 
 function EduDashboard() {
     const { data, isLoading } = useEducatorDashboardQuery();
-    if (!data) return;
 
     const dashboard = data?.data;
 
@@ -27,6 +26,15 @@ function EduDashboard() {
         );
     }
 
+    const stats = [
+        { label: "Total Courses", value: dashboard?.totalCourses ?? 0, icon: BookOpen },
+        { label: "Total Students", value: dashboard?.totalStudents ?? 0, icon: Users },
+        { label: "Publish Courses", value: dashboard?.publishedCourse ?? 0, icon: CheckCircle2 },
+        { label: "Draft Courses", value: dashboard?.draftCourse ?? 0, icon: FileEdit },
+        { label: "Total Durations", value: formatTotalHours(dashboard?.totalDuration) ?? 0, icon: Clock },
+        { label: "Total Revenue", value: `$${dashboard?.revenue?.revenue ?? 0}`, icon: DollarSign },
+    ];
+
     return (
         <div className="max-w-6xl mx-auto p-6 lg:p-10 h-screen text-[#3D2F24] tracking-tight space-y-8">
             {/* Header */}
@@ -40,71 +48,25 @@ function EduDashboard() {
             </div>
 
             {/* Cards Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {/* Total Courses */}
-                <div className="bg-white border border-[#E6DFD5] p-4 rounded-xl flex flex-col justify-between shadow-sm">
-                    <div className="flex items-center justify-between text-[#8C6D53] mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#A39281]">
-                            Total Courses
-                        </span>
-                        <BookOpen className="h-4 w-4 text-[#8C6D53]" />
-                    </div>
-                    <span className="text-2xl font-medium text-[#3D2F24]">
-                        {dashboard?.totalCourses ?? 0}
-                    </span>
-                </div>
-
-                {/* Total Students */}
-                <div className="bg-white border border-[#E6DFD5] p-4 rounded-xl flex flex-col justify-between shadow-sm">
-                    <div className="flex items-center justify-between text-[#8C6D53] mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#A39281]">
-                            Total Students
-                        </span>
-                        <Users className="h-4 w-4 text-[#8C6D53]" />
-                    </div>
-                    <span className="text-2xl font-medium text-[#3D2F24]">
-                        {dashboard?.totalStudents ?? 0}
-                    </span>
-                </div>
-
-                {/* Published Courses */}
-                <div className="bg-white border border-[#E6DFD5] p-4 rounded-xl flex flex-col justify-between shadow-sm">
-                    <div className="flex items-center justify-between text-[#8C6D53] mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#A39281]">
-                            Published
-                        </span>
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                    </div>
-                    <span className="text-2xl font-medium text-[#3D2F24]">
-                        {dashboard?.publishedCourse ?? 0}
-                    </span>
-                </div>
-
-                {/* Draft Courses */}
-                <div className="bg-white border border-[#E6DFD5] p-4 rounded-xl flex flex-col justify-between shadow-sm">
-                    <div className="flex items-center justify-between text-[#8C6D53] mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#A39281]">
-                            Drafts
-                        </span>
-                        <FileEdit className="h-4 w-4 text-amber-600" />
-                    </div>
-                    <span className="text-2xl font-medium text-[#3D2F24]">
-                        {dashboard?.draftCoures ?? 0}
-                    </span>
-                </div>
-
-                {/* Total Duration */}
-                <div className="bg-white border border-[#E6DFD5] p-4 rounded-xl flex flex-col justify-between shadow-sm col-span-2 lg:col-span-1">
-                    <div className="flex items-center justify-between text-[#8C6D53] mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#A39281]">
-                            Content Length
-                        </span>
-                        <Clock className="h-4 w-4 text-[#8C6D53]" />
-                    </div>
-                    <span className="text-2xl font-medium text-[#3D2F24]">
-                        {formatTotalHours(dashboard?.totalDuration)}
-                    </span>
-                </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {stats.map((stat, index) => {
+                    const Icon = stat.icon;
+                    return (
+                        <div key={index} className="bg-white border border-[#E6DFD5] p-5 rounded-xl shadow-sm flex items-center justify-between">
+                            <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-[#A39281] block mb-1">
+                                    {stat.label}
+                                </span>
+                                <span className="text-2xl font-serif font-medium text-[#3D2F24]">
+                                    {stat.value}
+                                </span>
+                            </div>
+                            <div className="w-10 h-10 rounded-lg bg-[#FAF7F2] border border-[#E6DFD5] flex items-center justify-center text-[#8C6D53]">
+                                <Icon className="h-5 w-5" />
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Recent Courses */}
@@ -192,4 +154,4 @@ function EduDashboard() {
     );
 }
 
-export default EduDashboard
+export default EduDashboard;

@@ -4,6 +4,7 @@ import { generateRegisterLinkToken, refreshTokenGenerator, accessTokenGenerator 
 import sendEmail from '../services/emailSender';
 import { redis } from '../config/redis';
 import jwt from 'jsonwebtoken';
+import { Educator } from '../model/educator.model';
 
 const registerUser = async (req: Request, res: Response) => {
     try {
@@ -261,6 +262,106 @@ const getMe = async (req: Request, res: Response) => {
     }
 }
 
+const apply = async (req: Request, res: Response) => {
+    try {
+        const { headline, bio } = req.body;
+
+        const educator = await Educator.findOne({ user: req.user._id });
+
+        if (educator) {
+            if (educator.status === "pending") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Your application is already submitted and under review",
+                });
+            }
+
+            if (educator.status === "approved") {
+                return res.status(400).json({
+                    success: false,
+                    message: "You are already an educator",
+                });
+            }
+
+            // rejected -> allow reapply
+            if (educator.status === "rejected") {
+                educator.headline = headline;
+                educator.bio = bio;
+                educator.status = "pending";
+                educator.rejectedReason = null;
+
+                await educator.save();
+
+                return res.status(200).json({
+                    success: true,
+                    message: "Your application has been resubmitted and is under review",
+                });
+            }
+        }
+
+        await Educator.create({
+            user: req.user._id,
+            headline,
+            bio,
+            status: 'pending',
+            rejectedReason: null
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Thanks for applying. Your application is now under review",
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        })
+    }
+}
+
+const appliedCheck = async (req: Request, res: Response) => {
+    try {
+        const educator = await Educator.findOne({
+            user: req.user._id
+        });
+
+        if (!educator) {
+            return res.status(404).json({
+                success: false,
+                message: "You have not applied to become an educator."
+            });
+        }
+
+        if (educator.status === "approved") {
+            return res.status(200).json({
+                success: true,
+                status: "approved",
+                message: "Your application is approved. You are now an educator."
+            });
+        }
+
+        if (educator.status === "rejected") {
+            return res.status(200).json({
+                success: true,
+                status: "rejected",
+                rejectedReason: educator.rejectedReason,
+                message: "Your application was rejected. You can apply again."
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            status: "pending",
+            message: "Your application is under review. Please wait a few days."
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        })
+    }
+}
+
 export const authController = {
     registerUser,
     loginUser,
@@ -268,4 +369,6 @@ export const authController = {
     getMe,
     refreshAccessToken,
     logoutUser,
+    apply,
+    appliedCheck
 }

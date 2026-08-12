@@ -395,9 +395,9 @@ const deleteCourse = async (req: Request, res: Response) => {
 const educatorDashboard = async (req: Request, res: Response) => {
     try {
         const courses = await Course.find({ educator: req.user._id }).sort({ createdAt: -1 });
-        const totalStudents = courses.reduce((sum, coures) => (sum + coures.enrolledStudents.length), 0);
-        const publishedCourse = courses.filter((coures) => (coures.published === "published")).length;
-        const draftCoures = courses.filter((coures) => (coures.published === "draft")).length;
+        const totalStudents = courses.reduce((sum, course) => (sum + course.enrolledStudents.length), 0);
+        const publishedCourse = courses.filter((course) => (course.published === "published")).length;
+        const draftCourse = courses.filter((course) => (course.published === "draft")).length;
         const totalDuration = courses.reduce((sum, course) => (sum + course.duration), 0) || 0;
         const recentCourses = courses.slice(0, 3);
 
@@ -425,10 +425,10 @@ const educatorDashboard = async (req: Request, res: Response) => {
                 totalCourses: courses.length,
                 totalStudents,
                 publishedCourse,
-                draftCoures,
+                draftCourse,
                 totalDuration,
                 recentCourses,
-                revenue,
+                revenue: revenue[0],
             }
         })
     } catch (error) {

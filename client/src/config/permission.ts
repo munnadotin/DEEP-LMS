@@ -3,6 +3,7 @@ type Permission =
     | "myLearnings"
     | "createCourse"
     | "myCourses"
+    | "applyForEducatorRole"
     | "manageCategories";
 
 type Role = "student" | "educator" | "admin";
@@ -10,6 +11,7 @@ type Role = "student" | "educator" | "admin";
 export const permissions: Record<Role, Permission[]> = {
     student: [
         "myLearnings",
+        "applyForEducatorRole"
     ],
 
     educator: [

@@ -78,10 +78,13 @@ export interface EducatorDashboard {
     totalCourses: number,
     totalStudents: number,
     publishedCourse: number,
-    draftCoures: number,
+    draftCourse: number,
     totalDuration: number,
     recentCourses: [Course],
-    revenue: []
+    revenue: {
+        _id: null,
+        revenue: number,
+    }
 }
 
 export interface AdminDashboard {

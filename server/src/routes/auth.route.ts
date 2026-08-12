@@ -3,6 +3,7 @@ import { authController } from '../controllers/auth.controller';
 import validate from '../middlewares/validate';
 import registerSchema from '../validations/auth.validation';
 import { auth_middleware } from '../middlewares/auth.middleware';
+import { roleMiddleware } from '../middlewares/role.middleware';
 
 const authRouter = Router();
 
@@ -51,5 +52,11 @@ authRouter.post("/refresh-access-token", authController.refreshAccessToken);
  * - token
  */
 authRouter.post("/logout", auth_middleware, authController.logoutUser);
+
+// 
+authRouter.post("/educator/apply", auth_middleware, roleMiddleware("student"), authController.apply)
+
+// 
+authRouter.get("/educator/application", auth_middleware, roleMiddleware("student"), authController.appliedCheck);
 
 export default authRouter;

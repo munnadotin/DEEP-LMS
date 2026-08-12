@@ -15,7 +15,7 @@ type EduDashboard = {
 }
 
 type AdmDashboard = {
-    data: AdminDashboard
+    dashboard: AdminDashboard
 }
 
 const courseReducer = baseApi.injectEndpoints({

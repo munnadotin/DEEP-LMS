@@ -17,8 +17,8 @@ const ENDPOINTS = {
     },
     // Student Endpoints
     Student: {
-        APPLY_FOR_EDUCATOR: "/student/educator/apply",
-        CHECK_APPLICATION: "/student/educator/application"
+        APPLY_FOR_EDUCATOR: "/auth/educator/apply",
+        CHECK_APPLICATION: "/auth/educator/application"
     },
     // Category Endpoints
     Category: {
