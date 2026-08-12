@@ -16,7 +16,10 @@ const educatorSchema = new mongoose.Schema<EducatorModel>({
         enum: ["pending", "approved", "rejected"],
         default: "pending"
     },
-    rejectReason: String,
+    rejectedReason: {
+        type: String || null,
+        default: null
+    },
 }, {
     timestamps: true
 });

@@ -5,5 +5,5 @@ export interface EducatorModel extends Document {
     headline: string
     bio: string;
     status: "pending" | "approved" | "rejected",
-    rejectReason: String;
+    rejectedReason: String | null;
 }
