@@ -9,7 +9,7 @@ type Permission =
 
 type NavItem = {
     label: string;
-    href: string;
+    href: string | ((role: string) => string);
     icon: any;
     permission: Permission;
 };
@@ -17,10 +17,11 @@ type NavItem = {
 export const navigation: NavItem[] = [
     {
         label: "Dashboard",
-        href: "/educator/dashboard",
+        href: (role: string) => `/${role}/dashboard`,
         icon: LayoutDashboard,
         permission: "dashboard",
     },
+
 
     {
         label: "My Learnings",

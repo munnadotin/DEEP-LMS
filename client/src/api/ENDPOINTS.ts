@@ -8,13 +8,25 @@ const ENDPOINTS = {
         REFRESH_TOKEN: "/auth/refresh-access-token",
         LOGOUT: "/auth/logout",
     },
+    // Admin Endpoints
+    Admin: {
+        DASHBOARD: "/admin/dashboard",
+        GET_APPLICATIONS: "/admin/applications",
+        APPROVE_APPLICATIONS: (id: string) => `/admin/educators/${id}/approve`,
+        REJECT_APPLICATIONS: (id: string) => `/admin/educators/${id}/reject`,
+    },
+    // Student Endpoints
+    Student: {
+        APPLY_FOR_EDUCATOR: "/student/educator/apply",
+        CHECK_APPLICATION: "/student/educator/application"
+    },
     // Category Endpoints
     Category: {
         GET_ALL: "/category",
         GET_CATEGORY_BY_SLUG: (slug: string) => `/category/${slug}`,
         CREATE_CATEGORY: "/category",
-        UPDATE_CATEGORY_BY_SLUG: "/category/:slug",
-        DELETE_CATEGORY_BY_SLUG: "/category/:slug",
+        UPDATE_CATEGORY_BY_SLUG: (slug: string) => `/category/${slug}`,
+        DELETE_CATEGORY_BY_SLUG: (slug: string) => `/category/${slug}`,
     },
     // Course Endpoints
     Course: {

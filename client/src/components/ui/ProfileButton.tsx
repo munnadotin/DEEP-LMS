@@ -73,10 +73,11 @@ const ProfileButton = ({ user }: Props) => {
                         <div className="py-1">
                             {navigation.filter((item) => userPermission.includes(item.permission)).map((item) => {
                                 const Icon = item.icon;
+                                const href = typeof item.href === "function" ? item.href(user?.role) : item.href;
                                 return (
                                     <Link
-                                        key={item.href}
-                                        href={item.href}
+                                        key={item.label}
+                                        href={href}
                                         onClick={() => setIsOpen(false)}
                                         className="flex items-center gap-3 px-4 py-2 hover:bg-zinc-100/70"
                                     >

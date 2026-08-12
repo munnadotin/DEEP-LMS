@@ -1,4 +1,4 @@
-import { Course, Dashboard, GetCourse } from "@/types/Course.type";
+import { AdminDashboard, Course, EducatorDashboard, GetCourse } from "@/types/Course.type";
 import { baseApi } from "../services/baseApi";
 import ENDPOINTS from "@/api/ENDPOINTS";
 
@@ -11,7 +11,11 @@ type DraftCourse = {
 }
 
 type EduDashboard = {
-    data: Dashboard
+    data: EducatorDashboard
+}
+
+type AdmDashboard = {
+    data: AdminDashboard
 }
 
 const courseReducer = baseApi.injectEndpoints({
@@ -73,8 +77,16 @@ const courseReducer = baseApi.injectEndpoints({
                 method: "GET",
             }),
             providesTags: ["Course"]
+        }),
+        // admin dashboard
+        adminDashboard: builder.query<AdmDashboard, void>({
+            query: () => ({
+                url: ENDPOINTS.Admin.DASHBOARD,
+                method: "GET",
+            }),
+            providesTags: ["Course"]
         })
     }),
 })
 
-export const { useGetAllCoursesQuery, useGetAllDraftCourseQuery, useGetCourseBySlugQuery, useCreateCourseMutation, useDeleteCourseBySlugMutation, useUpdateCourseByIdMutation, useEducatorDashboardQuery } = courseReducer;
+export const { useGetAllCoursesQuery, useGetAllDraftCourseQuery, useGetCourseBySlugQuery, useCreateCourseMutation, useDeleteCourseBySlugMutation, useUpdateCourseByIdMutation, useEducatorDashboardQuery, useAdminDashboardQuery } = courseReducer;

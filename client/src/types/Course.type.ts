@@ -44,7 +44,7 @@ export interface Review {
     createdAt: string;
     updatedAt: string;
     user: {
-        _id:string;
+        _id: string;
         name: string;
     }
 }
@@ -74,7 +74,7 @@ export interface CreateCourse {
     thumbnail: any;
 }
 
-export interface Dashboard {
+export interface EducatorDashboard {
     totalCourses: number,
     totalStudents: number,
     publishedCourse: number,
@@ -82,4 +82,13 @@ export interface Dashboard {
     totalDuration: number,
     recentCourses: [Course],
     revenue: []
+}
+
+export interface AdminDashboard {
+    pendingEducatorApplications: number,
+    revenue: { _id: null, totalEnrollments: number, totalRevenue: number },
+    totalCourses: number,
+    totalEducators: number,
+    totalEnrollments: number,
+    totalStudents: number,
 }

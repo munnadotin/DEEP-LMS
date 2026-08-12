@@ -22,7 +22,6 @@ function LoginForm() {
                 localStorage.setItem("accessToken", accessToken);
                 setUser(res.data);
                 toast.success(res?.message);
-                router.push("/");
             }
         } catch (error: any) {
             toast.error(error?.data?.message || "Login failed");

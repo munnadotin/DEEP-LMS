@@ -6,6 +6,7 @@ import courseRouter from "./routes/course.route";
 import categoryRouter from "./routes/category.route";
 import enrollRouter from "./routes/enroll.route";
 import cors from "cors";
+import { adminRouter } from "./routes/admin.route";
 
 const app = express();
 app.use(express.json());
@@ -19,5 +20,6 @@ app.use("/auth", authRouter);
 app.use("/course", courseRouter);
 app.use("/category", categoryRouter);
 app.use("/enroll", enrollRouter);
+app.use("/admin", adminRouter);
 
 export default app;

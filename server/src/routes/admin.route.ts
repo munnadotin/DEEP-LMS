@@ -1,19 +1,19 @@
-import { categoryController } from "../controllers/categroy.controller";
+import { Router } from "express";
 import { auth_middleware } from "../middlewares/auth.middleware";
 import { roleMiddleware } from "../middlewares/role.middleware";
-import categoryRouter from "./category.route";
+import { adminController } from "../controllers/admin.controller";
 
-/**
- * @access private
- * @description only admin
- */
+export const adminRouter = Router();
 
-// create category
-categoryRouter.post("/", auth_middleware, roleMiddleware("admin"), categoryController.createCategory);
+// dashboard
+adminRouter.get("/dashboard", auth_middleware, roleMiddleware("admin"), adminController.dashboard);
 
-// update category
-categoryRouter.put("/:slug", auth_middleware, roleMiddleware("admin"), categoryController.updateCategory);
+// get all applications
+adminRouter.get("/applications", auth_middleware, roleMiddleware("admin"), adminController.getApplications);
 
-// delete category
-categoryRouter.delete("/:slug", auth_middleware, roleMiddleware("admin"), categoryController.deleteCategory);
+// approve application
+adminRouter.patch("/educator/:id/approve", auth_middleware, roleMiddleware("admin"), adminController.approveEducator);
+
+// reject application
+adminRouter.patch("/educator/:id/reject", auth_middleware, roleMiddleware("admin"), adminController.rejectEducator);
 

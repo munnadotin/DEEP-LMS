@@ -43,7 +43,7 @@ const Navbar = () => {
                     <div className="hidden lg:flex items-center gap-1 text-sm font-medium text-(--muted-foreground)">
                         <Link href="/course" className="flex items-center gap-1.5 px-3 py-2 rounded-sm hover:text-foreground hover:bg-(--border)/20 transition-all duration-200">
                             <BookOpen className="h-4 w-4 text-(--muted-foreground) group-focus-within:text-(--primary) transition-colors duration-200" strokeWidth={2} />
-                            <span className="text-sm font-medium" >Explore</span>
+                            <span className="text-sm font-medium">Explore</span>
                         </Link>
                     </div>
 
