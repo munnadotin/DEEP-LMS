@@ -94,7 +94,7 @@ export default function AdminCategory() {
             </div>
 
             {/* Model */}
-            {activeModel && <CreateCategoryForm category={selectedCategory} setActiveModel={setActiveModel} />}
+            {activeModel && <CreateCategoryForm key={selectedCategory?._id ?? "create"} category={selectedCategory} setActiveModel={setActiveModel} />}
         </div>
     )
 }

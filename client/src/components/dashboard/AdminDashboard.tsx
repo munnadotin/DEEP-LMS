@@ -63,7 +63,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* User Applications */}
-            <section className="border-t border-[#E6DFD5] pt-8">
+            <section className="pt-8">
                 <div className="flex flex-col gap-1 mb-6">
                     <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8C6D53]">
                         Applications

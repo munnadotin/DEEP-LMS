@@ -26,7 +26,7 @@ export default function ChapterForm({ courseId, setActiveModel, chapter }: Props
         }
     });
     const [createChapter, { isLoading }] = useCreateChapterMutation();
-    const [updateChapterById, { isLoading: updateLoading }] = useUpdateChapterByIdMutation();
+    const [updateChapterById] = useUpdateChapterByIdMutation();
 
     useEffect(() => {
         if (chapter) {

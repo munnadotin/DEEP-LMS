@@ -1,6 +1,7 @@
 "use client";
 
 import { useCreateCategoryMutation, useUpdateCategoryMutation } from "@/redux/features/categoryApi";
+import { AlertCircle } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import toast, { ToastIcon } from "react-hot-toast";
@@ -24,35 +25,21 @@ export default function CreateCategoryForm({ setActiveModel, category }: Props) 
     const [createCategory, { isLoading }] = useCreateCategoryMutation();
     const [updateCategory] = useUpdateCategoryMutation();
     const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<CategoryType>({
-        mode: "onBlur",
         defaultValues: {
-            name: "",
+            name: category?.name || "",
         },
     });
 
-    useEffect(() => {
-        if (category) {
-            reset({
-                name: category.name,
-            });
-        } else {
-            reset({
-                name: "",
-            });
-        }
-    }, [category, reset]);
-
     const onSubmit = async (data: CategoryType) => {
         try {
-            console.log(data)
             if (category) {
                 const res = await updateCategory({ slug: category.slug, data }).unwrap();
-                // console.log(res);
                 toast.success(res.message);
             } else {
                 const res = await createCategory(data).unwrap();
                 toast.success(res.message);
             }
+            reset();
             setActiveModel(false);
         } catch (error: any) {
             console.error(error);
@@ -93,15 +80,16 @@ export default function CreateCategoryForm({ setActiveModel, category }: Props) 
                         </label>
 
                         <input
+                            {...register("name", { required: "Category name is required." })}
                             id="name"
                             type="text"
                             placeholder="e.g. Technology"
-                            {...register("name", { required: "Category name is required." })}
-                            className={`w-full rounded border bg-[#FAF8F4] px-3.5 py-2.5 text-sm text-[#3D2F24] outline-none transition-colors placeholder:text-[#B4A493] ${errors.name ? "border-red-400 focus:border-red-500" : "border-[#E6DFD5] focus:border-[#8C6D53]"}`} />
+                            className={`w-full rounded border bg-[#FAF8F4] px-3.5 py-2.5 text-sm text-[#3D2F24] outline-none transition-colors placeholder:text-[#B4A493] ${errors.name ? "border-red-400 focus:border-red-500" : "border-[#E6DFD5] focus:border-[#8C6D53]"}`}
+                        />
 
                         {errors.name && (
-                            <p className="mt-1.5 text-xs text-red-700">
-                                {errors.name.message}
+                            <p className="flex items-center gap-1 mt-1.5 text-xs text-red-700">
+                                <AlertCircle className="h-3 w-3" />  {errors.name.message}
                             </p>
                         )}
                     </div>
