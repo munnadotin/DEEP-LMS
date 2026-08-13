@@ -97,7 +97,7 @@ const rejectEducator = async (req: Request, res: Response) => {
 // get all applications
 const getApplications = async (_req: Request, res: Response) => {
     try {
-        const applications = await Educator.find({ status: 'pending' });
+        const applications = await Educator.find({ status: 'pending' }).populate("user", "name email");
 
         if (applications.length === 0) {
             return res.status(200).json({

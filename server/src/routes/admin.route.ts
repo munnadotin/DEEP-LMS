@@ -12,8 +12,8 @@ adminRouter.get("/dashboard", auth_middleware, roleMiddleware("admin"), adminCon
 adminRouter.get("/applications", auth_middleware, roleMiddleware("admin"), adminController.getApplications);
 
 // approve application
-adminRouter.patch("/educator/:id/approve", auth_middleware, roleMiddleware("admin"), adminController.approveEducator);
+adminRouter.patch("/educators/:id/approve", auth_middleware, roleMiddleware("admin"), adminController.approveEducator);
 
 // reject application
-adminRouter.patch("/educator/:id/reject", auth_middleware, roleMiddleware("admin"), adminController.rejectEducator);
+adminRouter.patch("/educators/:id/reject", auth_middleware, roleMiddleware("admin"), adminController.rejectEducator);
 

@@ -1,5 +1,10 @@
 import ENDPOINTS from "@/api/ENDPOINTS";
 import { baseApi } from "../services/baseApi";
+import { UserApplication } from "@/types/User.type";
+
+type ApplicationType = {
+    applications: UserApplication[]
+}
 
 export const authReducer = baseApi.injectEndpoints({
     endpoints: (builder) => ({
@@ -41,7 +46,7 @@ export const authReducer = baseApi.injectEndpoints({
             providesTags: ["Auth"]
         }),
         // get all applications
-        getApplications: builder.query<any, void>({
+        getApplications: builder.query<ApplicationType, void>({
             query: () => ({
                 url: ENDPOINTS.Admin.GET_APPLICATIONS,
                 method: "GET",
@@ -58,9 +63,10 @@ export const authReducer = baseApi.injectEndpoints({
         }),
         // reject user application
         rejectApplication: builder.mutation({
-            query: (id: string) => ({
+            query: ({ id, data }) => ({
                 url: ENDPOINTS.Admin.REJECT_APPLICATIONS(id),
                 method: "PATCH",
+                body: data
             }),
             invalidatesTags: ["Auth"]
         }),

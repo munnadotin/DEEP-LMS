@@ -265,7 +265,6 @@ const getMe = async (req: Request, res: Response) => {
 const apply = async (req: Request, res: Response) => {
     try {
         const { headline, bio } = req.body;
-        console.log(headline, bio)
 
         const educator = await Educator.findOne({ user: req.user._id });
 
@@ -327,8 +326,9 @@ const appliedCheck = async (req: Request, res: Response) => {
         });
 
         if (!educator) {
-            return res.status(404).json({
+            return res.status(200).json({
                 success: false,
+                applied: false,
                 message: "You have not applied to become an educator."
             });
         }
@@ -336,6 +336,7 @@ const appliedCheck = async (req: Request, res: Response) => {
         if (educator.status === "approved") {
             return res.status(200).json({
                 success: true,
+                applied: true,
                 status: "approved",
                 message: "Your application is approved. You are now an educator."
             });
@@ -344,6 +345,7 @@ const appliedCheck = async (req: Request, res: Response) => {
         if (educator.status === "rejected") {
             return res.status(200).json({
                 success: true,
+                applied: true,
                 status: "rejected",
                 rejectedReason: educator.rejectedReason,
                 message: "Your application was rejected. You can apply again."
@@ -352,6 +354,7 @@ const appliedCheck = async (req: Request, res: Response) => {
 
         return res.status(200).json({
             success: true,
+            applied: true,
             status: "pending",
             message: "Your application is under review. Please wait a few days."
         });

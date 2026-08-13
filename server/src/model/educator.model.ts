@@ -4,6 +4,7 @@ import type { EducatorModel } from "../types/Educator.type";
 const educatorSchema = new mongoose.Schema<EducatorModel>({
     user: {
         type: mongoose.Types.ObjectId,
+        ref: "User",
         require: true
     },
     headline: {
