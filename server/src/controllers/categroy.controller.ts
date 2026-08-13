@@ -122,6 +122,7 @@ const updateCategory = async (req: Request, res: Response) => {
             });
         }
         const { name } = req.body;
+
         if (!name) {
             return res.status(400).json({
                 success: false,

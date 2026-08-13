@@ -21,9 +21,10 @@ const categoryReducer = baseApi.injectEndpoints({
         }),
         // create category
         createCategory: builder.mutation({
-            query: () => ({
+            query: (data) => ({
                 url: ENDPOINTS.Category.CREATE_CATEGORY,
                 method: "POST",
+                body: data
             }),
             invalidatesTags: ["category"]
         }),
@@ -37,13 +38,14 @@ const categoryReducer = baseApi.injectEndpoints({
         }),
         // update category
         updateCategory: builder.mutation({
-            query: (slug: string) => ({
+            query: ({ slug, data }) => ({
                 url: ENDPOINTS.Category.UPDATE_CATEGORY_BY_SLUG(slug),
-                method: "PATCH"
+                method: "PUT",
+                body: data
             }),
             invalidatesTags: ["category"]
         })
     })
 })
 
-export const { useGetCategoryQuery } = categoryReducer;
+export const { useGetCategoryQuery, useCreateCategoryMutation, useDeleteCategoryMutation, useUpdateCategoryMutation } = categoryReducer;

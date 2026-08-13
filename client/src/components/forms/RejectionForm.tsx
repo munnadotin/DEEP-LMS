@@ -20,7 +20,6 @@ export default function RejectionForm({ id, closeForm }: Props) {
     const onSubmit = async (data: FormType) => {
         try {
             const res = await rejectApplication({ id, data }).unwrap();
-            console.log(res)
             toast.success(res.message);
             closeForm(false);
         } catch (error: any) {
