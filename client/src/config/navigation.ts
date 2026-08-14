@@ -1,8 +1,9 @@
-import { Library, LayoutDashboard, BookOpen, FolderTree, SquareMousePointer } from "lucide-react";
+import { Library, LayoutDashboard, BookOpen, FolderTree, SquareMousePointer, User } from "lucide-react";
 
 type Permission =
     | "dashboard"
     | "applyForEducatorRole"
+    | "users"
     | "myLearnings"
     | "createCourse"
     | "myCourses"
@@ -29,7 +30,12 @@ export const navigation: NavItem[] = [
         icon: Library,
         permission: "myLearnings",
     },
-
+    {
+        label: "Users",
+        href: "/admin/users",
+        icon: User,
+        permission: "users"
+    },
     {
         label: "Become Educator",
         href: "/apply",

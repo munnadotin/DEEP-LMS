@@ -14,6 +14,7 @@ const ENDPOINTS = {
         GET_APPLICATIONS: "/admin/applications",
         APPROVE_APPLICATIONS: (id: string) => `/admin/educators/${id}/approve`,
         REJECT_APPLICATIONS: (id: string) => `/admin/educators/${id}/reject`,
+        GET_USERS: `/admin/users`
     },
     // Student Endpoints
     Student: {

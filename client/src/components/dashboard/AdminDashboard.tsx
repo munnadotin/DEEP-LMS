@@ -8,9 +8,9 @@ import AdminApplications from "../ui/AdminApplications";
 
 export default function AdminDashboard() {
     const { data: adminDashboard, isLoading } = useAdminDashboardQuery();
-    const { data } = useGetApplicationsQuery();
+    const { data, isLoading: applicationLoading } = useGetApplicationsQuery();
 
-    if (isLoading) {
+    if (isLoading || applicationLoading) {
         return <Loader />;
     }
 
@@ -75,7 +75,7 @@ export default function AdminDashboard() {
                         Review, track, and manage all submitted applications from one place.
                     </p>
                 </div>
-                <AdminApplications applications={data!.applications} />
+                <AdminApplications applications={data?.applications ?? []} />
             </section>
         </div>
     );

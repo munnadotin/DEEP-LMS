@@ -1,6 +1,6 @@
 import ENDPOINTS from "@/api/ENDPOINTS";
 import { baseApi } from "../services/baseApi";
-import { UserApplication } from "@/types/User.type";
+import { User, UserApplication } from "@/types/User.type";
 
 type ApplicationType = {
     applications: UserApplication[]
@@ -86,9 +86,18 @@ export const authReducer = baseApi.injectEndpoints({
                 method: "GET",
             }),
             providesTags: ["Auth"]
+        }),
+        // get users 
+        getUsers: builder.query<User[], void>({
+            query: (params: any) => ({
+                url: ENDPOINTS.Admin.GET_USERS,
+                method: "GET",
+                params
+            }),
+            providesTags: ["Auth"]
         })
     })
 })
 
 
-export const { useLoginMutation, useRegisterUserMutation, useGetMeQuery, useLogOutMutation, useVerifyAccountQuery, useGetApplicationsQuery, useApproveApplicationMutation, useRejectApplicationMutation, useApplyEducatorMutation, useCheckApplicationQuery } = authReducer;
+export const { useLoginMutation, useRegisterUserMutation, useGetMeQuery, useLogOutMutation, useVerifyAccountQuery, useGetApplicationsQuery, useApproveApplicationMutation, useRejectApplicationMutation, useApplyEducatorMutation, useCheckApplicationQuery, useGetUsersQuery } = authReducer;

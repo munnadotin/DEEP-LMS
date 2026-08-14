@@ -2,6 +2,7 @@ type Permission =
     | "dashboard"
     | "myLearnings"
     | "createCourse"
+    | "users"
     | "myCourses"
     | "applyForEducatorRole"
     | "manageCategories";
@@ -23,5 +24,6 @@ export const permissions: Record<Role, Permission[]> = {
     admin: [
         "dashboard",
         "manageCategories",
+        "users"
     ],
 } as const;
