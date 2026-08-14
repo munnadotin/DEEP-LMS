@@ -169,9 +169,59 @@ const dashboard = async (_req: Request, res: Response) => {
     }
 }
 
+// get all users 
+const getUsers = async (req: Request, res: Response) => {
+    try {
+        const { search, role, page = 1, limit = 10 } = req.query;
+        const pageNumber = Number(page);
+        const limitNumber = Number(limit);
+
+        let query = {} as any;
+
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } }
+            ]
+        }
+
+        if (role) {
+            query.role = role;
+        }
+
+        const [users, total] = await Promise.all([
+            User.find(query)
+                .sort({ name: 1 })
+                .skip((pageNumber - 1) * limitNumber)
+                .limit(limitNumber),
+
+            User.countDocuments(query)
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            message: "Users retrieved successfully",
+            users,
+            pagination: {
+                page: pageNumber,
+                limit: limitNumber,
+                total,
+                totalPages: Math.ceil(total / limitNumber)
+            }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+            error: (error as Error).message
+        });
+    }
+}
+
 export const adminController = {
     approveEducator,
     rejectEducator,
     getApplications,
-    dashboard
+    dashboard,
+    getUsers
 }

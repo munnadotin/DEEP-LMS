@@ -54,9 +54,8 @@ courseRouter.delete("/:courseId", auth_middleware, roleMiddleware("educator", "a
 // educator dashboard
 courseRouter.get("/educator/dashboard", auth_middleware, roleMiddleware("educator", "admin"), courseController.educatorDashboard);
 
-
 /**
- * @desciption Chapter Routes
+ * @description Chapter Routes
  * @route /chapter
  */
 courseRouter.use("/:courseId/chapter", chapterRouter);

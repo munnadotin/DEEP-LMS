@@ -17,3 +17,5 @@ adminRouter.patch("/educators/:id/approve", auth_middleware, roleMiddleware("adm
 // reject application
 adminRouter.patch("/educators/:id/reject", auth_middleware, roleMiddleware("admin"), adminController.rejectEducator);
 
+// get users
+adminRouter.get("/users", auth_middleware, roleMiddleware("admin"), adminController.getUsers);

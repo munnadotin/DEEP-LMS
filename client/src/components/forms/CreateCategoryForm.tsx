@@ -2,9 +2,9 @@
 
 import { useCreateCategoryMutation, useUpdateCategoryMutation } from "@/redux/features/categoryApi";
 import { AlertCircle } from "lucide-react";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
-import toast, { ToastIcon } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 type CategoryType = {
     name: string;

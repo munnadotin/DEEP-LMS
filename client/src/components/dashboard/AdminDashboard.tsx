@@ -20,7 +20,7 @@ export default function AdminDashboard() {
         { label: "Total Students", value: dashboard?.totalStudents ?? 0, icon: Users },
         { label: "Total Educators", value: dashboard?.totalEducators ?? 0, icon: GraduationCap },
         { label: "Total Courses", value: dashboard?.totalCourses ?? 0, icon: BookOpen },
-        { label: "Total Revenue", value: `$${dashboard?.revenue?.totalRevenue ?? 0}`, icon: DollarSign },
+        { label: "Total Revenue", value: `₹${dashboard?.revenue?.totalRevenue ?? 0}`, icon: DollarSign },
         { label: "Total Enrollments", value: dashboard?.totalEnrollments ?? 0, icon: CheckCircle },
         { label: "Pending Applications", value: dashboard?.pendingEducatorApplications ?? 0, icon: UserCheck },
     ];
