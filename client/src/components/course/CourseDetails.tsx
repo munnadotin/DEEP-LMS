@@ -61,10 +61,10 @@ function CourseDetails({ courseTitle }: { courseTitle: string }) {
                 },
             };
 
-            const razorpay = new (window as any).Razorpay(options);
+            const razorpay = new window.Razorpay(options);
             razorpay.open();
         } catch (error) {
-            console.log(error)
+            console.error("Enrollment failed:", error);
         }
     }
 
