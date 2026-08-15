@@ -21,8 +21,23 @@ courseRouter.get("/", courseController.filterCourses);
 // get all courses
 courseRouter.get("/all", courseController.getAllCourses);
 
-// get course by slug
-courseRouter.get("/:slug", optionalMiddleware, courseController.getCourseBySlug);
+// EDUCATOR / ADMIN ROUTES
+
+// get all draft courses
+courseRouter.get("/draft", auth_middleware, roleMiddleware("educator", "admin"), courseController.getAllDraftCourse);
+
+// get all courses by educator
+courseRouter.get("/educator-courses", auth_middleware, roleMiddleware("educator", "admin"), courseController.getAllCoursesByEducator);
+
+// educator dashboard
+courseRouter.get("/educator/dashboard", auth_middleware, roleMiddleware("educator", "admin"), courseController.educatorDashboard);
+
+// COURSE CREATION
+
+// create course
+courseRouter.post("/create", upload.single("thumbnail"), auth_middleware, roleMiddleware("educator"), validate(courseSchema), courseController.createCourse);
+
+// REVIEWS
 
 // get all reviews by courseId
 courseRouter.get("/:courseId/reviews", reviewController.getReview);
@@ -36,23 +51,16 @@ courseRouter.put("/:courseId/review/:reviewId", auth_middleware, roleMiddleware(
 // delete review
 courseRouter.delete("/:courseId/review/:reviewId", auth_middleware, roleMiddleware("student"), reviewController.deleteReview);
 
-// create course
-courseRouter.post("/create", upload.single("thumbnail"), auth_middleware, roleMiddleware("educator"), validate(courseSchema), courseController.createCourse);
+// get course by slug
+courseRouter.get("/:slug", optionalMiddleware, courseController.getCourseBySlug);
 
-// get all draft courses
-courseRouter.get("/draft", auth_middleware, roleMiddleware("educator", "admin"), courseController.getAllDraftCourse);
-
-// get all courses by educator
-courseRouter.get("/", auth_middleware, roleMiddleware("educator", "admin"), courseController.getAllCoursesByEducator);
+// COURSE UPDATE / DELETE
 
 // update course
 courseRouter.patch("/:courseId", upload.single("thumbnail"), auth_middleware, roleMiddleware("educator"), courseController.updateCourse);
 
 // delete course
 courseRouter.delete("/:courseId", auth_middleware, roleMiddleware("educator", "admin"), courseController.deleteCourse);
-
-// educator dashboard
-courseRouter.get("/educator/dashboard", auth_middleware, roleMiddleware("educator", "admin"), courseController.educatorDashboard);
 
 /**
  * @description Chapter Routes

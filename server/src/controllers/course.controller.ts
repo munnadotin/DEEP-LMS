@@ -135,7 +135,8 @@ const getAllDraftCourse = async (req: Request, res: Response) => {
 // get all courses by educator
 const getAllCoursesByEducator = async (req: Request, res: Response) => {
     try {
-        const courses = await Course.find({ educator: req.user._id, published: "published" });
+        const courses = await Course.find({ educator: req.user._id });
+
         // cache hit
         const cachedCourse = await redis.get(`educator:publish:courses:${req.user._id}`);
 

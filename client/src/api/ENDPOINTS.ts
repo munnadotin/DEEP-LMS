@@ -32,7 +32,7 @@ const ENDPOINTS = {
     // Course Endpoints
     Course: {
         GET_ALL: "/course/all",
-        GET_ALL_COURSES_BY_EDUCATOR: "/course",
+        GET_ALL_COURSES_BY_EDUCATOR: "/course/educator-courses",
         GET_DRAFT_COURSE: "/course/draft",
         GET_COURSE_BY_SLUG: (slug: string) => `/course/${slug}`,
         CREATE_COURSE: "/course/create",
