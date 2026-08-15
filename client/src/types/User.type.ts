@@ -10,6 +10,7 @@ export interface RegisterUser extends LoginUser {
 
 export interface IUser extends LoginUser, RegisterUser {
     _id: string;
+    isVerified?: boolean
 }
 
 export interface User {
@@ -25,4 +26,12 @@ export interface UserApplication {
     headline: string;
     bio: string;
     status: "pending" | "approved" | "rejected"
+}
+
+export interface ValidateUser {
+    _id: string;
+    name: string;
+    email: string;
+    isVerified: boolean;
+    role: "student" | "educator" | "admin";
 }

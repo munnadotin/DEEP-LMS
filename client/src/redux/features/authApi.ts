@@ -1,9 +1,19 @@
 import ENDPOINTS from "@/api/ENDPOINTS";
 import { baseApi } from "../services/baseApi";
-import { User, UserApplication } from "@/types/User.type";
+import { UserApplication, ValidateUser } from "@/types/User.type";
 
 type ApplicationType = {
     applications: UserApplication[]
+}
+
+type UserType = {
+    users: ValidateUser[];
+}
+
+type GetUsersParams = {
+    search?: string;
+    role?: "admin" | "educator" | "user";
+    isVerified?: boolean;
 }
 
 export const authReducer = baseApi.injectEndpoints({
@@ -88,7 +98,7 @@ export const authReducer = baseApi.injectEndpoints({
             providesTags: ["Auth"]
         }),
         // get users 
-        getUsers: builder.query<User[], void>({
+        getUsers: builder.query<UserType, GetUsersParams>({
             query: (params: any) => ({
                 url: ENDPOINTS.Admin.GET_USERS,
                 method: "GET",
