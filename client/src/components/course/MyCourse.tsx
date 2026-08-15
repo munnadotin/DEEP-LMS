@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { Plus, Edit3, Trash2, Eye, Users, Star, Clock, } from "lucide-react";
-import { useDeleteCourseBySlugMutation, useGetAllCoursesQuery } from "@/redux/features/courseApi";
+import { useDeleteCourseBySlugMutation, useGetAllCourseByEducatorQuery } from "@/redux/features/courseApi";
 import Loader from "../ui/Loader";
 import toast from "react-hot-toast";
 
 export default function MyCourse() {
-    const { data, isLoading } = useGetAllCoursesQuery();
+    const { data, isLoading } = useGetAllCourseByEducatorQuery();
     const [deleteCourseBySlug] = useDeleteCourseBySlugMutation();
 
     const courses = data?.courses;

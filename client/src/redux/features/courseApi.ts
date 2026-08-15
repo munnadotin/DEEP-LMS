@@ -28,6 +28,14 @@ const courseReducer = baseApi.injectEndpoints({
             }),
             providesTags: ["Course"],
         }),
+        // get all courses by educator
+        getAllCourseByEducator: builder.query<any, void>({
+            query: () => ({
+                url: ENDPOINTS.Course.GET_ALL_COURSES_BY_EDUCATOR,
+                method: "GET"
+            }),
+            providesTags: ["Course"]
+        }),
         // get all draft course
         getAllDraftCourse: builder.query<DraftCourse, void>({
             query: () => ({
@@ -89,4 +97,4 @@ const courseReducer = baseApi.injectEndpoints({
     }),
 })
 
-export const { useGetAllCoursesQuery, useGetAllDraftCourseQuery, useGetCourseBySlugQuery, useCreateCourseMutation, useDeleteCourseBySlugMutation, useUpdateCourseByIdMutation, useEducatorDashboardQuery, useAdminDashboardQuery } = courseReducer;
+export const { useGetAllCoursesQuery, useGetAllCourseByEducatorQuery, useGetAllDraftCourseQuery, useGetCourseBySlugQuery, useCreateCourseMutation, useDeleteCourseBySlugMutation, useUpdateCourseByIdMutation, useEducatorDashboardQuery, useAdminDashboardQuery } = courseReducer;
