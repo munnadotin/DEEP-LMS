@@ -104,4 +104,3 @@ The frontend will be available at:
 http://localhost:3000
 ```
 
-The backend will run on the configured server port.
